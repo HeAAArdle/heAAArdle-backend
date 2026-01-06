@@ -12,6 +12,25 @@ The frontend is maintained in a separate repository and communicates with this b
 - python-dotenv
 - PostgreSQL
 - SQLAlchemy + Alembic
+
+---
+
+## Project Structure
+```
+backend/
+├── app/
+│   ├── main.py              # App entry point
+│   ├── api/
+│   │   └── v1/               # API version 1
+│   │       ├── api.py        # Central router
+│   │       └── endpoints/    # Route handlers
+│   └── core/                 # Global configuration and shared utilities
+├── .env                      # Local environment variables
+├── .env.example              # Example env file
+├── requirements.txt
+└── README.md
+```
+
 ---
 
 ## Setup Instructions
