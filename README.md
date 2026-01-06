@@ -19,15 +19,23 @@ The frontend is maintained in a separate repository and communicates with this b
 ```
 backend/
 ├── app/
-│   ├── main.py              # App entry point
+│   ├── main.py               # App entry point
 │   ├── api/
 │   │   └── v1/               # API version 1
 │   │       ├── api.py        # Central router
 │   │       └── endpoints/    # Route handlers
-│   └── core/                 # Global configuration and shared utilities
+│   ├── core/                 # Global configuration and shared utilities
+│   │   └── config.py
+│   ├── models/               # Database models
+│   ├── schemas/              # Pydantic models for request and response validation
+│   ├── services/             # Business logic
+│   ├── db/                   # Data
+│   ├── utils/                # Utility functions used across the app
+│   │   └── helpers/          # Helper modules
 ├── .env                      # Local environment variables
 ├── .env.example              # Example env file
-├── requirements.txt
+├── requirements.txt          # Python package dependencies
+├── .gitignore
 └── README.md
 ```
 
