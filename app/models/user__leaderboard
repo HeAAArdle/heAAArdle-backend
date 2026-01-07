@@ -1,0 +1,16 @@
+from sqlalchemy import Column, Integer, Table, ForeignKey
+
+from sqlalchemy.dialects.postgresql import UUID
+
+from app.db.base import Base
+
+from enums import modes, period
+
+user_leaderboard = Table(
+    "user_leaderboard",
+    Base.metadata,
+    Column("userID", UUID(as_uuid=True), ForeignKey("users.userID"), primary_key=True),
+    Column("mode", modes, ForeignKey("leaderboards.mode"), primary_key=True),
+    Column("period", period, ForeignKey("leaderboards.period"), primary_key=True),
+    Column("numberOfWins", Integer, nullable=False, default=0),
+)
