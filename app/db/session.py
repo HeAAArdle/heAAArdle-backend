@@ -5,6 +5,6 @@ from sqlalchemy.orm import sessionmaker
 from app.core.config import settings
 
 # Kakatamad i-satisfy si Pylance idgaf nalang
-engine = create_engine(settings.database_url)
+engine = create_engine(settings.database_url) # type: ignore
  
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
