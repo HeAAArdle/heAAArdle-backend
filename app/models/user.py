@@ -8,9 +8,9 @@ import uuid
 
 from app.db.base import Base
 
-from app.models.game_session import GameSession
-from app.models.statistics import Statistics
-from app.models.user__leaderboard import UserLeaderboard
+# from app.models.game_session import GameSession
+# from app.models.statistics import Statistics
+# from app.models.user__leaderboard import UserLeaderboard
 
 class User(Base):
     __tablename__ = "users"
@@ -25,16 +25,16 @@ class User(Base):
     # Relationships
 
     # User <-> GameSession: One-to-Many
-    game_sessions: Mapped["GameSession"] = relationship(
+    game_sessions: Mapped["GameSession"] = relationship( # type: ignore
         "GameSession", back_populates="user", uselist=False
     )
 
     # User <-> Statistics: One-to-One
-    statistics: Mapped["Statistics"] = relationship(
+    statistics: Mapped["Statistics"] = relationship( # type: ignore
         "Statistics", back_populates="user"
     )
 
     # User <-> Leaderboard: Many-to-Many
-    user_leaderboards: Mapped[list["UserLeaderboard"]] = relationship(
+    user_leaderboards: Mapped[list["UserLeaderboard"]] = relationship( # type: ignore
         back_populates="user"
     )

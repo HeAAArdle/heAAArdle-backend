@@ -8,8 +8,8 @@ import uuid
 
 from app.db.base import Base
 
-from app.models.song import Song
-from app.models.game_session import GameSession
+# from app.models.song import Song
+# from app.models.game_session import GameSession
 
 class DailyGame(Base):
     __tablename__ = "daily_games"
@@ -25,12 +25,12 @@ class DailyGame(Base):
     # Relationships
 
     # DailyGame <-> Song: Many-to-One
-    song: Mapped["Song"] = relationship(
+    song: Mapped["Song"] = relationship( # type: ignore
         "Song", back_populates="daily_games"
     )
 
     # DailyGame <-> GameSession: One-to-Many
-    game_sessions: Mapped[list["GameSession"]] = relationship(
+    game_sessions: Mapped[list["GameSession"]] = relationship( # type: ignore
         "GameSession", back_populates="daily_game"
     )
 

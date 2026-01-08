@@ -8,9 +8,9 @@ import uuid
 
 from app.db.base import Base
 
-from app.models.user import User
+# from app.models.user import User
 
-from enums import modes
+from app.models.enums import modes
 
 class Statistics(Base):
     __tablename__ = "statistics"
@@ -36,4 +36,6 @@ class Statistics(Base):
     # Relationships
 
     # Statistics <-> User: One-to-One
-    user: Mapped["User"] = relationship("User", back_populates="statistics")
+    user: Mapped["User"] = relationship( # type: ignore
+        "User", back_populates="statistics"
+    )

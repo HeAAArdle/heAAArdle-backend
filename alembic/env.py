@@ -5,6 +5,15 @@ from sqlalchemy import create_engine
 from alembic import context
 
 from app.db.base import Base
+from app.models.song import Song
+from app.models.artist import Artist
+from app.models.song__artist import SongArtist
+from app.models.daily_game import DailyGame
+from app.models.game_session import GameSession
+from app.models.user import User
+from app.models.statistics import Statistics
+from app.models.leaderboard import Leaderboard
+from app.models.user__leaderboard import UserLeaderboard
 
 from app.core.config import settings
 

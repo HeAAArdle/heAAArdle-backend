@@ -8,10 +8,10 @@ import uuid
 
 from app.db.base import Base
 
-from app.models.user import User
-from app.models.daily_game import DailyGame
+# from app.models.user import User
+# from app.models.daily_game import DailyGame
 
-from enums import results
+from app.models.enums import results
 
 class GameSession(Base):
     __tablename__ = "game_sessions"
@@ -28,19 +28,19 @@ class GameSession(Base):
         UUID(as_uuid=True), ForeignKey("users.userID"), nullable=False, index=True
     )
     songID: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("songs.songID"), nullable=True, index=True
+        UUID(as_uuid=True), nullable=True, index=True
     )
-    date: Mapped[Date] = mapped_column(Date, ForeignKey("daily_games.date"), nullable=True, index=True)
+    date: Mapped[Date] = mapped_column(Date, nullable=True, index=True)
 
     # Relationships
 
     # GameSession <-> User: Many-to-One
-    user: Mapped["User"] = relationship(
+    user: Mapped["User"] = relationship( # type: ignore
         "User", back_populates="game_sessions"
     )
 
     # GameSession <-> DailyGame: Many-to-One
-    daily_game: Mapped["DailyGame"] = relationship(
+    daily_game: Mapped["DailyGame"] = relationship( # type: ignore
         "DailyGame", back_populates="game_sessions"
     )
 

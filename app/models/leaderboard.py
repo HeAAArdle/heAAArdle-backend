@@ -2,9 +2,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 
-from app.models.user__leaderboard import UserLeaderboard
+# from app.models.user__leaderboard import UserLeaderboard
 
-from enums import modes, period
+from app.models.enums import modes, period
 
 class Leaderboard(Base):
     __tablename__ = "leaderboards"
@@ -15,6 +15,6 @@ class Leaderboard(Base):
     # Relationships
 
     # Leaderboard <-> User: Many-to-Many
-    user_leaderboards: Mapped[list["UserLeaderboard"]] = relationship(
+    user_leaderboards: Mapped[list["UserLeaderboard"]] = relationship( # type: ignore
         back_populates="leaderboard"
     )

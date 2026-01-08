@@ -8,7 +8,7 @@ import uuid
 
 from app.db.base import Base
 
-from app.models.song__artist import SongArtist
+# from app.models.song__artist import SongArtist
 
 class Artist(Base):
     __tablename__ = "artists"
@@ -22,6 +22,6 @@ class Artist(Base):
     # Relationships
 
     # Artist <-> Song: Many-to-Many
-    song_artists: Mapped[list["SongArtist"]] = relationship(
+    song_artists: Mapped[list["SongArtist"]] = relationship( # type: ignore
         back_populates="artist"
     )
