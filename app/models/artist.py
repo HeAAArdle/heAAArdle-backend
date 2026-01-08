@@ -1,20 +1,27 @@
-from sqlalchemy import Column, String
-
-from sqlalchemy.orm import relationship
+from sqlalchemy import String
 
 from sqlalchemy.dialects.postgresql import UUID
+
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 import uuid
 
 from app.db.base import Base
 
+from app.models.song__artist import SongArtist
+
 class Artist(Base):
     __tablename__ = "artists"
 
-    artistID = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    artistID: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
 
-    name = Column(String, index=True, nullable=False)
+    name: Mapped[str] = mapped_column(String, nullable=False, index=True)
 
     # Relationships
 
-    songs = relationship("Song", secondary="song_is_by_artist", back_populates="artists")
+    # Artist <-> Song: Many-to-Many
+    song_artists: Mapped[list["SongArtist"]] = relationship(
+        back_populates="artist"
+    )

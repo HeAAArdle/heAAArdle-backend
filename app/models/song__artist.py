@@ -1,12 +1,32 @@
-from sqlalchemy import Column, Table, ForeignKey
+from sqlalchemy import ForeignKey
 
 from sqlalchemy.dialects.postgresql import UUID
 
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+import uuid
+
 from app.db.base import Base
 
-song_is_by_artist = Table(
-    "song_artist",
-    Base.metadata,
-    Column("songID", UUID(as_uuid=True), ForeignKey("songs.songID"), primary_key=True),
-    Column("artistID", UUID(as_uuid=True), ForeignKey("artists.artistID"), primary_key=True),
-)
+from app.models.song import Song
+from app.models.artist import Artist
+
+class SongArtist(Base):
+    __tablename__ = "song__artist"
+
+    songID:   Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("songs.songID"), primary_key=True
+    )
+    artistID: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("artists.artistID"), primary_key=True
+    )
+
+    # Relationships
+
+    song: Mapped["Song"] = relationship(
+        back_populates="song_artists"
+    )
+
+    artist: Mapped["Artist"] = relationship(
+        back_populates="song_artists"
+    )

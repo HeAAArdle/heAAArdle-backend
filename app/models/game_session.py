@@ -1,32 +1,48 @@
-from sqlalchemy import Column, Date, ForeignKey, ForeignKeyConstraint
-
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import Date, ForeignKey, ForeignKeyConstraint
 
 from sqlalchemy.dialects.postgresql import UUID
 
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 import uuid
 
-from enums import results
-
 from app.db.base import Base
+
+from app.models.user import User
+from app.models.daily_game import DailyGame
+
+from enums import results
 
 class GameSession(Base):
     __tablename__ = "game_sessions"
 
-    gameSessionID = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    gameSessionID: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
 
-    result: Mapped[str] = mapped_column(results, index=True, nullable=False)
+    result: Mapped[str] = mapped_column(results, nullable=False, index=True)
 
     # Foreign Keys
 
-    userID = Column(UUID(as_uuid=True), ForeignKey("users.userID"), index=True, nullable=False)
-    songID = Column(UUID(as_uuid=True), ForeignKey("songs.songID"), index=True, nullable=True)
-    date   = Column(Date, ForeignKey("daily_games.date"), index=True, nullable=True)
+    userID: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.userID"), nullable=False, index=True
+    )
+    songID: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("songs.songID"), nullable=True, index=True
+    )
+    date: Mapped[Date] = mapped_column(Date, ForeignKey("daily_games.date"), nullable=True, index=True)
 
     # Relationships
 
-    user = relationship("User", back_populates="game_sessions")
-    daily_games = relationship("DailyGame", back_populates="game_sessions")
+    # GameSession <-> User: Many-to-One
+    user: Mapped["User"] = relationship(
+        "User", back_populates="game_sessions"
+    )
+
+    # GameSession <-> DailyGame: Many-to-One
+    daily_game: Mapped["DailyGame"] = relationship(
+        "DailyGame", back_populates="game_sessions"
+    )
 
     __table_args__ = (
         ForeignKeyConstraint(
