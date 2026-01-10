@@ -1,4 +1,4 @@
-from sqlalchemy import Date, ForeignKey
+from sqlalchemy import Date, Integer, ForeignKey
 
 from sqlalchemy.dialects.postgresql import UUID
 
@@ -15,6 +15,8 @@ class DailyGame(Base):
     __tablename__ = "daily_games"
 
     date: Mapped[Date] = mapped_column(Date, primary_key=True)
+
+    startAt: Mapped[int] = mapped_column(Integer, nullable=False)
 
     # Foreign Keys
 
