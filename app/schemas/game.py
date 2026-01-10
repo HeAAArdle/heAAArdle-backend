@@ -6,8 +6,8 @@ class SubmitGameRequest(BaseModel):
     gameSessionID: str
     gameMode: Literal["original", "daily"]
     won: bool
-    guessCount : int
-    date : date | None
+    attempts: int
+    date: date | None
 
 class GetArchivedDailyGameResultsResponse(BaseModel):
     numberOfDays: int

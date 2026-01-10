@@ -2,7 +2,6 @@ from pydantic import BaseModel
 from datetime import date
 
 class GetAllSongResponse(BaseModel):
-    songID: str
     title: str
 
 class GetRandomSongResponse(BaseModel):
