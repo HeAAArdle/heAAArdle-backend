@@ -6,8 +6,8 @@ def process_guess(game_session_id: str, guess: str) -> dict[str, str | bool]:
 
     # If the session is already done, return done response immediately
     if session.done == True:
-        return { "type": "result", "is_correct": False, "done": True }
-    
+        return {"type": "result", "is_correct": False, "done": True}
+
     # Update attempts count
     session.attempts += 1
 
@@ -24,4 +24,4 @@ def process_guess(game_session_id: str, guess: str) -> dict[str, str | bool]:
         done = False
 
     # Prepare the response
-    return { "type" : "result", "is_correct" : is_correct, "done" : done }
+    return {"type": "result", "is_correct": is_correct, "done": done}

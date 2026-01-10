@@ -26,26 +26,10 @@ from app.ws.session import sessions, GameSession as WSGameSession
 
 from app.utils.helpers import get_time_until_end_of_day, calculate_time_in_minutes
 
+from app.services.constants import MODE_AUDIO_CLIP_LENGTH, MODE_EXPIRES_AT, MODE_MAXIMUM_ATTEMPTS
+
 router = APIRouter()
 
-MODE_AUDIO_CLIP_LENGTH = {
-    "original": 16,
-    "daily":    16,
-    "rapid":    3,
-}
-
-MODE_MAXIMUM_ATTEMPTS = {
-    "original": 6,
-    "daily":    6,
-    "rapid":    1,
-    "lyrics":   1,
-}
-
-MODE_EXPIRES_AT = {
-    "original": 15,
-    "rapid"   : 2,
-    "lyrics"  : 2,
-}
 
 @router.post("/start", response_model=StartGameResponse)
 def start_game(payload: StartGameRequest, db: Session = Depends(get_db)):
@@ -60,19 +44,28 @@ def start_game(payload: StartGameRequest, db: Session = Depends(get_db)):
 
         # Validate daily game existence
         if not daily_game:
-            raise HTTPException(status_code=404, detail="No song available for today's daily game.")
-        
+            raise HTTPException(
+                status_code=404, detail="No song available for today's daily game."
+            )
+
         # Implementation may change: Verify userID if provided (e.g., check if the user has already played today's daily game)
         if payload.userID:
-            user_already_played_daily_game = db.query(GameSession).filter(
-                GameSession.userID == payload.userID,
-                GameSession.date == today,
-                GameSession.mode == "daily"
-            ).first()
+            user_already_played_daily_game = (
+                db.query(GameSession)
+                .filter(
+                    GameSession.userID == payload.userID,
+                    GameSession.date == today,
+                    GameSession.mode == "daily",
+                )
+                .first()
+            )
 
             if user_already_played_daily_game:
-                raise HTTPException(status_code=403, detail="User has already played today's daily game.")
-        
+                raise HTTPException(
+                    status_code=403,
+                    detail="User has already played today's daily game.",
+                )
+
         song = daily_game.song
 
         start_at = daily_game.startAt
@@ -80,15 +73,17 @@ def start_game(payload: StartGameRequest, db: Session = Depends(get_db)):
         # Set expiration time until the end of the day as per system design
         expires_in = calculate_time_in_minutes(get_time_until_end_of_day())
 
-        game_date = today     
+        game_date = today
 
     else:
         # For non-daily modes, select a random song from the database
         song = db.query(Song).order_by(func.random()).first()
-    
+
         # Validate song existence
         if not song:
-            raise HTTPException(status_code=500, detail="No songs available in the database.")
+            raise HTTPException(
+                status_code=500, detail="No songs available in the database."
+            )
 
         maximum_clip_length = MODE_AUDIO_CLIP_LENGTH[mode]
 
@@ -111,11 +106,12 @@ def start_game(payload: StartGameRequest, db: Session = Depends(get_db)):
 
     sessions[game_session_id] = WSGameSession(
         answer=song.title,
+        answer_song_id=song.songID,
         user_id=payload.userID,
         mode=mode,
         date=game_date,
         maximum_attempts=maximum_attempts,
-        expires_in=expires_in
+        expires_in=expires_in,
     )
 
     return StartGameResponse(
@@ -124,5 +120,5 @@ def start_game(payload: StartGameRequest, db: Session = Depends(get_db)):
         wsURL=f"wss://{settings.host}/api/v1/ws/game/{game_session_id}",
         audio=song.audio,
         startAt=start_at,
-        date=game_date
+        date=game_date,
     )

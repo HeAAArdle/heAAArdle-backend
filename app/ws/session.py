@@ -1,15 +1,16 @@
 from typing import Optional, Dict
 
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 
 class GameSession:
-    def __init__(self, *, answer: str, user_id: Optional[str], mode: str, date: Optional[str], maximum_attempts: int, expires_in: int):
-        self.answer = answer                     # the correct answer (song title)
+    def __init__(self, *, answer: str, answer_song_id: str, user_id: Optional[str], mode: str, date: Optional[date], maximum_attempts: int, expires_in: int):
+        self.answer = answer.lower().strip() # the correct answer (song title)
+        self.answer_song_id = answer_song_id
 
         self.user_id = user_id
 
         self.mode = mode
-        self.date = date                         # only for daily mode
+        self.date = date
         self.maximum_attempts = maximum_attempts
 
         self.attempts = 0

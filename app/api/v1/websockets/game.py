@@ -35,17 +35,15 @@ async def game_ws(websocket: WebSocket, game_session_id: str):
             # Validate expiration of the game session
             if session.expires_at < datetime.now(timezone.utc):
                 # Notify the client about expiration
-                await manager.send(game_session_id, {
-                    "type": "expired"
-                })
+                await manager.send(game_session_id, {"type": "expired"})
 
                 # Break the game loop
                 break
 
             # Wait for a guess
 
-            # { 
-            #   "type":  "guess", 
+            # {
+            #   "type":  "guess",
             #   "guess": string,
             # }
             data = await websocket.receive_json()
@@ -58,9 +56,9 @@ async def game_ws(websocket: WebSocket, game_session_id: str):
 
             # Validate message format
             if not isinstance(data, dict) or type != "guess":
-                await manager.send(game_session_id, {
-                    "error": "Invalid client message format."
-                })
+                await manager.send(
+                    game_session_id, {"error": "Invalid client message format."}
+                )
 
                 continue
 

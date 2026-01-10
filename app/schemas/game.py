@@ -19,7 +19,8 @@ class StartGameResponse(BaseModel):
 
 class SubmitGameRequest(BaseModel):
     gameSessionID: str
-    gameMode: Literal["original", "daily"]
+    userID: Optional[str]
+    mode: Literal["original", "daily"]
     won: bool
     attempts: int
     date: Optional[date]
