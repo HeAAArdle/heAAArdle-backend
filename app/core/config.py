@@ -10,6 +10,8 @@ class Settings(BaseSettings):
 
     direct_url: Optional[str] = None
 
+    host: Optional[str] = None
+
     model_config = SettingsConfigDict(env_file=".env")
 
 settings = Settings()

@@ -6,6 +6,17 @@ class StartGameRequest(BaseModel):
     mode: Literal["original", "daily", "rapid", "lyrics"]
     userID: Optional[str]
 
+class StartGameResponse(BaseModel):
+    gameSessionID: str
+    expiresIn: int
+    wsURL: str
+    audio: str
+    startAt: int
+    date: Optional[date]  # null for non-daily modes
+
+    class Config:
+        from_attributes = True
+
 class SubmitGameRequest(BaseModel):
     gameSessionID: str
     gameMode: Literal["original", "daily"]

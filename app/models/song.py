@@ -24,6 +24,7 @@ class Song(Base):
     link:        Mapped[str]       = mapped_column(String, unique=True, nullable=False)
     audio:       Mapped[str]       = mapped_column(String, unique=True, nullable=False)
     lyrics:      Mapped[str]       = mapped_column(Text, nullable=False) # long text; no index because of size
+    duration:    Mapped[int]       = mapped_column(Integer, nullable=False, index=True)
 
     # Relationships
 

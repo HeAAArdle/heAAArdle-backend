@@ -11,7 +11,7 @@ from app.db.base import Base
 # from app.models.user import User
 # from app.models.daily_game import DailyGame
 
-from app.models.enums import results
+from app.models.enums import modes, results
 
 class GameSession(Base):
     __tablename__ = "game_sessions"
@@ -20,6 +20,7 @@ class GameSession(Base):
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
 
+    mode:   Mapped[str] = mapped_column(modes, nullable=False, index=True)
     result: Mapped[str] = mapped_column(results, nullable=False, index=True)
 
     # Foreign Keys
