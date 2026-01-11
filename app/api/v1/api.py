@@ -4,6 +4,7 @@ from app.api.v1.endpoints import health
 from app.api.v1.endpoints import songs
 from app.api.v1.endpoints import start
 from app.api.v1.endpoints import submit
+from app.api.v1.endpoints import archive
 
 api_router = APIRouter()
 
@@ -17,3 +18,5 @@ api_router.include_router(songs.router, prefix="/")
 api_router.include_router(start.router, prefix="/game")
 
 api_router.include_router(submit.router, prefix="/game")
+
+api_router.include_router(archive.router, prefix="/archive")

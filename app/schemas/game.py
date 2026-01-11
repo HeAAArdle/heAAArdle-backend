@@ -4,9 +4,9 @@ from app.schemas.enums import GameMode, SubmittableGameMode
 
 import uuid
 
-from datetime import date
+from datetime import date as DateType
 
-from typing import List, Optional, Annotated, Self
+from typing import List, Literal, Optional, Annotated, Self, Union
 
 
 class StartGameRequest(BaseModel):
@@ -20,7 +20,7 @@ class StartGameResponse(BaseModel):
     wsURL: Annotated[str, AnyUrl]
     audio: Annotated[str, AnyUrl]
     startAt: Annotated[int, conint(ge=0)]
-    date: Optional[date]  # null for non-daily modes
+    date: Optional[DateType]  # null for non-daily modes
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -31,7 +31,7 @@ class SubmitGameRequest(BaseModel):
     mode: SubmittableGameMode
     won: bool
     attempts: Annotated[int, conint(ge=1)]
-    date: Optional[date]
+    date: Optional[DateType]
 
     @model_validator(mode='after')
     def validate_mode_and_date(self) -> Self:
@@ -46,10 +46,26 @@ class SubmitGameRequest(BaseModel):
 
         return self
 
+
+class UnavailableDay(BaseModel):
+    date: DateType
+    available: Literal[False]
+    result: None
+
+
+class AvailableDay(BaseModel):
+    date: DateType
+    available: Literal[True]
+    result: Optional[bool]
+
+
+Day = Union[AvailableDay, UnavailableDay]
+
+
 class GetArchivedDailyGameResultsResponse(BaseModel):
     numberOfDays: int
     startingDay: int
-    results: List[Optional[bool]]
+    days: List[Day]
 
     model_config = ConfigDict(from_attributes=True)
 
