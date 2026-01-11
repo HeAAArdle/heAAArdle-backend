@@ -100,7 +100,7 @@ def start_game(payload: StartGameRequest, db: Session = Depends(get_db)):
 
         # Validate song existence
         if not song:
-            raise HTTPException(status_code=500, detail="No songs available.")
+            raise HTTPException(status_code=404, detail="No songs available.")
 
         maximum_clip_length = MODE_AUDIO_CLIP_LENGTH[mode]
 
