@@ -13,7 +13,7 @@ api_router.include_router(health.router, prefix="/health")
 
 api_router.include_router(game.router, prefix="/ws/game")
 
-api_router.include_router(songs.router, prefix="/")
+api_router.include_router(songs.router, prefix="")
 
 api_router.include_router(start.router, prefix="/game")
 
