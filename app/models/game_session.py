@@ -8,8 +8,11 @@ import uuid
 
 from app.db.base import Base
 
-# from app.models.user import User
-# from app.models.daily_game import DailyGame
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.user import User
+    from app.models.daily_game import DailyGame
 
 from app.models.enums import modes, results
 
@@ -18,6 +21,10 @@ class GameSession(Base):
 
     gameSessionID: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+
+    wsGameSessionID: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), nullable=True, index=True, unique=True
     )
 
     mode:   Mapped[str] = mapped_column(modes, nullable=False, index=True)
@@ -36,12 +43,12 @@ class GameSession(Base):
     # Relationships
 
     # GameSession <-> User: Many-to-One
-    user: Mapped["User"] = relationship( # type: ignore
+    user: Mapped["User"] = relationship(
         "User", back_populates="game_sessions"
     )
 
     # GameSession <-> DailyGame: Many-to-One
-    daily_game: Mapped["DailyGame"] = relationship( # type: ignore
+    daily_game: Mapped["DailyGame"] = relationship(
         "DailyGame", back_populates="game_sessions"
     )
 

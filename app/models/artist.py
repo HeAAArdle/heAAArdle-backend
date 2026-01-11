@@ -8,7 +8,10 @@ import uuid
 
 from app.db.base import Base
 
-# from app.models.song__artist import SongArtist
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.song__artist import SongArtist
 
 class Artist(Base):
     __tablename__ = "artists"
@@ -22,6 +25,6 @@ class Artist(Base):
     # Relationships
 
     # Artist <-> Song: Many-to-Many
-    song_artists: Mapped[list["SongArtist"]] = relationship( # type: ignore
+    song_artists: Mapped[list["SongArtist"]] = relationship(
         back_populates="artist"
     )

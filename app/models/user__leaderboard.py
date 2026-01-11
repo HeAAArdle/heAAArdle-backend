@@ -8,8 +8,11 @@ import uuid
 
 from app.db.base import Base
 
-# from app.models.user import User
-# from app.models.leaderboard import Leaderboard
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.user import User
+    from app.models.leaderboard import Leaderboard
 
 from app.models.enums import modes, period
 
@@ -26,11 +29,11 @@ class UserLeaderboard(Base):
 
     # Relationships
 
-    user: Mapped["User"] = relationship( # type: ignore
+    user: Mapped["User"] = relationship(
         back_populates="user_leaderboards"
     )
 
-    leaderboard: Mapped["Leaderboard"] = relationship( # type: ignore
+    leaderboard: Mapped["Leaderboard"] = relationship(
         back_populates="user_leaderboards"
     )
 

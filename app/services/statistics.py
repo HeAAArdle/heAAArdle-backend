@@ -1,20 +1,29 @@
+from sqlalchemy import select
+
 from sqlalchemy.orm import Session
 
 from app.models.statistics import Statistics
 
 from app.schemas.game import SubmitGameRequest
 
+
 def update_statistics(db: Session, payload: SubmitGameRequest):
+    # Decompose payload
+    user_id = payload.userID
+    mode = payload.mode
+    won = payload.won
+    attempts = payload.attempts
+
     # Fetch existing statistics for the user and mode
-    statistics = (
-        db.query(Statistics)
-        .filter(Statistics.userID == payload.userID, Statistics.mode == payload.mode)
-        .first()
+    query = select(Statistics).where(
+        Statistics.userID == user_id, Statistics.mode == mode
     )
 
-    # Validate existence of a statistics record; if not, create a new statistics row
+    statistics = db.scalars(query).first()
+
+    # Validate existence of a statistics record; if nonexistent, create a new statistics row
     if not statistics:
-        statistics = Statistics(userID=payload.userID, mode=payload.mode)
+        statistics = Statistics(userID=user_id, mode=mode)
 
         db.add(statistics)
 
@@ -22,7 +31,7 @@ def update_statistics(db: Session, payload: SubmitGameRequest):
     statistics.gamesPlayed += 1
 
     # Update win/loss and streaks
-    if payload.won:
+    if won:
         statistics.winCount += 1
 
         statistics.currentStreak += 1
@@ -30,17 +39,17 @@ def update_statistics(db: Session, payload: SubmitGameRequest):
         if statistics.currentStreak > statistics.maximumStreak:
             statistics.maximumStreak = statistics.currentStreak
 
-        if payload.attempts == 1:
+        if attempts == 1:
             statistics.guesses1 += 1
-        elif payload.attempts == 2:
+        elif attempts == 2:
             statistics.guesses2 += 1
-        elif payload.attempts == 3:
+        elif attempts == 3:
             statistics.guesses3 += 1
-        elif payload.attempts == 4:
+        elif attempts == 4:
             statistics.guesses4 += 1
-        elif payload.attempts == 5:
+        elif attempts == 5:
             statistics.guesses5 += 1
-        elif payload.attempts == 6:
+        elif attempts == 6:
             statistics.guesses6 += 1
 
     else:

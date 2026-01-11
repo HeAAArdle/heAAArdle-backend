@@ -6,11 +6,14 @@ results = ENUM(
     name="results"
 )
 
+
 modes = ENUM(
     "original",
     "daily",
     name="modes"
 )
+
+
 period = ENUM(
     "daily",
     "weekly",

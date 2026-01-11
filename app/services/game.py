@@ -1,5 +1,6 @@
 from app.ws.session import sessions
 
+
 def process_guess(game_session_id: str, guess: str) -> dict[str, str | bool]:
     # Retrieve the session
     session = sessions[game_session_id]

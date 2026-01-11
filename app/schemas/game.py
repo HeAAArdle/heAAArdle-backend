@@ -1,41 +1,63 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, AnyUrl, conint, model_validator
+
+from app.schemas.enums import GameMode, SubmittableGameMode
+
+import uuid
+
 from datetime import date
-from typing import Literal, List, Optional
+
+from typing import List, Optional, Annotated, Self
+
 
 class StartGameRequest(BaseModel):
-    mode: Literal["original", "daily", "rapid", "lyrics"]
-    userID: Optional[str]
+    mode: GameMode
+    userID: Optional[uuid.UUID]
+
 
 class StartGameResponse(BaseModel):
-    gameSessionID: str
-    expiresIn: int
-    wsURL: str
-    audio: str
-    startAt: int
+    wsGameSessionID: str
+    expiresIn: Annotated[int, conint(ge=0)]
+    wsURL: Annotated[str, AnyUrl]
+    audio: Annotated[str, AnyUrl]
+    startAt: Annotated[int, conint(ge=0)]
     date: Optional[date]  # null for non-daily modes
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
+
 
 class SubmitGameRequest(BaseModel):
-    gameSessionID: str
-    userID: Optional[str]
-    mode: Literal["original", "daily"]
+    wsGameSessionID: str
+    userID: Optional[uuid.UUID]
+    mode: SubmittableGameMode
     won: bool
-    attempts: int
+    attempts: Annotated[int, conint(ge=1)]
     date: Optional[date]
+
+    @model_validator(mode='after')
+    def validate_mode_and_date(self) -> Self:
+        mode = self.mode
+        date = self.date
+
+        if mode == "daily" and date is None:
+            raise ValueError("Daily mode requires a date.")
+
+        if mode == "original" and date is not None:
+            raise ValueError("Original mode must not have a date.")
+
+        return self
 
 class GetArchivedDailyGameResultsResponse(BaseModel):
     numberOfDays: int
     startingDay: int
     results: List[Optional[bool]]
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
+
 
 class UserWins(BaseModel):
     username: str
     wins: int
+
 
 class GetLeaderboardDataOriginal(BaseModel):
     daily: UserWins
@@ -43,14 +65,15 @@ class GetLeaderboardDataOriginal(BaseModel):
     monthly: UserWins
     allTime: UserWins
 
+
 class GetLeaderboardDataDaily(BaseModel):
     weekly: UserWins
     monthly: UserWins
     allTime: UserWins
 
+
 class GetLeaderboardDataResponse(BaseModel):
     original: GetLeaderboardDataOriginal
     daily: GetLeaderboardDataDaily
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

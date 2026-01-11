@@ -1,69 +1,86 @@
+# FastAPI
 from fastapi import APIRouter, Depends, HTTPException
 
-from sqlalchemy import func
+from sqlalchemy import select, func
 
 from sqlalchemy.orm import Session
 
+# app core
 from app.core.config import settings
 
 from app.db.get_db import get_db
 
+# models
 from app.models.daily_game import DailyGame
 
 from app.models.game_session import GameSession
 
 from app.models.song import Song
 
+# schemas
 from app.schemas.game import StartGameRequest, StartGameResponse
+
+# websocket
+from app.ws.session import sessions, GameSession as WSGameSession
+
+# standard library
+import random
 
 from datetime import date
 
-import random
+# utils
+from app.utils.helpers import (
+    calculate_time_in_minutes,
+    get_time_until_end_of_day,
+    generate_unique_game_session_id,
+)
 
-import uuid
+from app.utils.constants import (
+    MODE_AUDIO_CLIP_LENGTH,
+    MODE_EXPIRES_IN,
+    MODE_MAXIMUM_ATTEMPTS,
+)
 
-from app.ws.session import sessions, GameSession as WSGameSession
-
-from app.utils.helpers import get_time_until_end_of_day, calculate_time_in_minutes
-
-from app.services.constants import MODE_AUDIO_CLIP_LENGTH, MODE_EXPIRES_AT, MODE_MAXIMUM_ATTEMPTS
 
 router = APIRouter()
 
 
 @router.post("/start", response_model=StartGameResponse)
 def start_game(payload: StartGameRequest, db: Session = Depends(get_db)):
+    # Decompose payload
     mode = payload.mode
+
+    user_id = payload.userID
 
     if mode == "daily":
         # Extract current date
-        today = date.today() # In format YYYY-MM-DD
+        today = date.today()  # In format YYYY-MM-DD
 
         # Fetch the daily game for the current date
-        daily_game = db.query(DailyGame).filter(DailyGame.date == today).first()
+        query1 = select(DailyGame).where(DailyGame.date == today)
+
+        daily_game = db.scalars(query1).first()
 
         # Validate daily game existence
         if not daily_game:
             raise HTTPException(
-                status_code=404, detail="No song available for today's daily game."
+                status_code=404, detail="No song available for today's daily Heardle."
             )
 
         # Implementation may change: Verify userID if provided (e.g., check if the user has already played today's daily game)
-        if payload.userID:
-            user_already_played_daily_game = (
-                db.query(GameSession)
-                .filter(
-                    GameSession.userID == payload.userID,
-                    GameSession.date == today,
-                    GameSession.mode == "daily",
-                )
-                .first()
+        if user_id:
+            query2 = select(GameSession).where(
+                GameSession.userID == user_id,
+                GameSession.mode == "daily",
+                GameSession.date == today,
             )
+
+            user_already_played_daily_game = db.scalars(query2).first()
 
             if user_already_played_daily_game:
                 raise HTTPException(
                     status_code=403,
-                    detail="User has already played today's daily game.",
+                    detail="User has already played today's daily Heardle.",
                 )
 
         song = daily_game.song
@@ -77,13 +94,13 @@ def start_game(payload: StartGameRequest, db: Session = Depends(get_db)):
 
     else:
         # For non-daily modes, select a random song from the database
-        song = db.query(Song).order_by(func.random()).first()
+        query3 = select(Song).order_by(func.random())
+
+        song = db.scalars(query3).first()
 
         # Validate song existence
         if not song:
-            raise HTTPException(
-                status_code=500, detail="No songs available in the database."
-            )
+            raise HTTPException(status_code=500, detail="No songs available.")
 
         maximum_clip_length = MODE_AUDIO_CLIP_LENGTH[mode]
 
@@ -92,22 +109,20 @@ def start_game(payload: StartGameRequest, db: Session = Depends(get_db)):
 
         start_at = random.randint(0, maximum_start_at)
 
-        expires_in = MODE_EXPIRES_AT[mode]
+        expires_in = MODE_EXPIRES_IN[mode]
 
         game_date = None
 
-    # Set mode-specific parameters
     maximum_attempts = MODE_MAXIMUM_ATTEMPTS[mode]
 
-    # Create a new game session
+    # Generate a unique WebSocket game session ID
+    game_session_id = generate_unique_game_session_id(sessions)
 
-    # Generate a unique game session ID
-    game_session_id = str(uuid.uuid4())
-
+    # Create a new WebSocket game session
     sessions[game_session_id] = WSGameSession(
         answer=song.title,
         answer_song_id=song.songID,
-        user_id=payload.userID,
+        user_id=user_id,
         mode=mode,
         date=game_date,
         maximum_attempts=maximum_attempts,
@@ -115,7 +130,7 @@ def start_game(payload: StartGameRequest, db: Session = Depends(get_db)):
     )
 
     return StartGameResponse(
-        gameSessionID=game_session_id,
+        wsGameSessionID=game_session_id,
         expiresIn=expires_in,
         wsURL=f"wss://{settings.host}/api/v1/ws/game/{game_session_id}",
         audio=song.audio,

@@ -8,7 +8,10 @@ import uuid
 
 from app.db.base import Base
 
-# from app.models.user import User
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.user import User
 
 from app.models.enums import modes
 
@@ -36,6 +39,6 @@ class Statistics(Base):
     # Relationships
 
     # Statistics <-> User: One-to-One
-    user: Mapped["User"] = relationship( # type: ignore
+    user: Mapped["User"] = relationship(
         "User", back_populates="statistics"
     )

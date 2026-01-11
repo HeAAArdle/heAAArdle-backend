@@ -8,9 +8,12 @@ import uuid
 
 from app.db.base import Base
 
-# from app.models.game_session import GameSession
-# from app.models.statistics import Statistics
-# from app.models.user__leaderboard import UserLeaderboard
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.game_session import GameSession
+    from app.models.statistics import Statistics
+    from app.models.user__leaderboard import UserLeaderboard
 
 class User(Base):
     __tablename__ = "users"
@@ -25,16 +28,16 @@ class User(Base):
     # Relationships
 
     # User <-> GameSession: One-to-Many
-    game_sessions: Mapped["GameSession"] = relationship( # type: ignore
+    game_sessions: Mapped["GameSession"] = relationship(
         "GameSession", back_populates="user", uselist=False
     )
 
     # User <-> Statistics: One-to-One
-    statistics: Mapped["Statistics"] = relationship( # type: ignore
+    statistics: Mapped["Statistics"] = relationship(
         "Statistics", back_populates="user"
     )
 
     # User <-> Leaderboard: Many-to-Many
-    user_leaderboards: Mapped[list["UserLeaderboard"]] = relationship( # type: ignore
+    user_leaderboards: Mapped[list["UserLeaderboard"]] = relationship(
         back_populates="user"
     )

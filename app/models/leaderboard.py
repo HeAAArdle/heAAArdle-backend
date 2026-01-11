@@ -2,7 +2,10 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 
-# from app.models.user__leaderboard import UserLeaderboard
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.user__leaderboard import UserLeaderboard
 
 from app.models.enums import modes, period
 
@@ -15,6 +18,6 @@ class Leaderboard(Base):
     # Relationships
 
     # Leaderboard <-> User: Many-to-Many
-    user_leaderboards: Mapped[list["UserLeaderboard"]] = relationship( # type: ignore
+    user_leaderboards: Mapped[list["UserLeaderboard"]] = relationship(
         back_populates="leaderboard"
     )
