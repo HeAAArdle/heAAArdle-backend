@@ -50,16 +50,32 @@ def submit_game(payload: SubmitGameRequest, db: Session = Depends(get_db)):
         )
 
     # Validate uniqueness of result
-    query = select(DBGameSession).where(
+    query1 = select(DBGameSession).where(
         DBGameSession.gameSessionID == ws_game_session_id
     )
 
-    game_session_data_exists = db.scalars(query).first()
+    game_session_data_exists = db.scalars(query1).first()
 
     if game_session_data_exists:
         raise HTTPException(
             status_code=409, detail="Result is already submitted for this session."
         )
+
+    # Implementation may change: Verify userID if provided (e.g., check if the user has already played today's daily game)
+    if mode == "daily" and user_id:
+        query2 = select(DBGameSession).where(
+            DBGameSession.userID == user_id,
+            DBGameSession.mode == "daily",
+            DBGameSession.date == date,
+        )
+
+        user_already_played_daily_game = db.scalars(query2).first()
+
+        if user_already_played_daily_game:
+            raise HTTPException(
+                status_code=403,
+                detail="User has already played today's daily Heardle.",
+            )
 
     # Fetch the WebSocket session to get the song ID
     ws_game_session = sessions.get(ws_game_session_id)
