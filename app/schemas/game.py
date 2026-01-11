@@ -10,17 +10,18 @@ from typing import List, Literal, Optional, Annotated, Self, Union
 
 
 class StartGameRequest(BaseModel):
-    mode: GameMode
     userID: Optional[uuid.UUID]
+    mode: GameMode
+    game_date: Optional[DateType]
 
 
 class StartGameResponse(BaseModel):
     wsGameSessionID: str
-    expiresIn: Annotated[int, conint(ge=0)]
     wsURL: Annotated[str, AnyUrl]
+    expiresIn: Annotated[int, conint(ge=0)]
     audio: Annotated[str, AnyUrl]
     startAt: Annotated[int, conint(ge=0)]
-    date: Optional[DateType]  # null for non-daily modes
+    date: Optional[DateType] # null for non-daily modes
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -31,17 +32,17 @@ class SubmitGameRequest(BaseModel):
     mode: SubmittableGameMode
     won: bool
     attempts: Annotated[int, conint(ge=1)]
-    date: Optional[DateType]
+    game_date: Optional[DateType]
 
     @model_validator(mode='after')
     def validate_mode_and_date(self) -> Self:
         mode = self.mode
-        date = self.date
+        game_date = self.game_date
 
-        if mode == "daily" and date is None:
+        if mode == "daily" and game_date is None:
             raise ValueError("Daily mode requires a date.")
 
-        if mode == "original" and date is not None:
+        if mode == "original" and game_date is not None:
             raise ValueError("Original mode must not have a date.")
 
         return self

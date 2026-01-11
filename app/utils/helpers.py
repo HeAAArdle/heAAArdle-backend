@@ -1,8 +1,4 @@
-import uuid
-
 from datetime import datetime, timedelta
-
-from app.ws.session import GameSession
 
 def get_time_until_end_of_day() -> timedelta:
     """
@@ -26,14 +22,3 @@ def calculate_time_in_minutes(timedelta: timedelta) -> int:
     """
 
     return int(timedelta.total_seconds() // 60)
-
-def generate_unique_game_session_id(sessions: dict[str, GameSession]) -> str:
-    """
-    Generates a unique Websocket game session ID.
-    """
-
-    while True:
-        session_id = str(uuid.uuid4())
-
-        if session_id not in sessions:
-            return session_id

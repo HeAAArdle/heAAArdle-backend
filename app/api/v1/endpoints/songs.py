@@ -2,17 +2,18 @@
 from fastapi import APIRouter, Depends
 
 # SQLAlchemy
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 # app core
 from app.db.get_db import get_db
 
 # models
-from app.models.song import Song
 
 # schemas
 from app.schemas.song import GetAllSongResponse
+
+# utils
+from app.services.song import get_all_song_titles
 
 
 router = APIRouter()
@@ -20,9 +21,7 @@ router = APIRouter()
 
 @router.get("/songs", response_model=list[GetAllSongResponse])
 def get_all_songs(db: Session = Depends(get_db)):
-    # Query all songs ordered by title
-    query = select(Song).order_by(Song.title)
+    # Get an ordered list of titles
+    titles = get_all_song_titles(db)
 
-    songs = db.scalars(query).all()
-
-    return songs
+    return [{"title": t} for t in titles]

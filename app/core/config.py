@@ -12,6 +12,8 @@ class Settings(BaseSettings):
 
     host: Optional[str] = None
 
+    websocket_endpoint_prefix: Optional[str] = None
+
     model_config = SettingsConfigDict(env_file=".env")
 
 settings = Settings()

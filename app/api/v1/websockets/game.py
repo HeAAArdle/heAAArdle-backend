@@ -4,7 +4,7 @@ from app.ws.connection_manager import manager
 
 from app.ws.session import sessions
 
-from app.services.game import process_guess
+from app.services.session import check_guess
 
 from datetime import datetime, timezone
 
@@ -69,7 +69,7 @@ async def game_ws(websocket: WebSocket, game_session_id: str):
             #   "is_correct": bool,
             #   "done":       bool,
             # }
-            response = process_guess(game_session_id, guess)
+            response = check_guess(game_session_id, guess)
 
             # Send back the response
             await manager.send(game_session_id, response)
