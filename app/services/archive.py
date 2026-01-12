@@ -1,6 +1,8 @@
 # standard library
 import calendar
 
+import uuid
+
 from datetime import date as DateType
 
 from typing import List, cast
@@ -51,7 +53,7 @@ Getters
 
 
 def get_daily_game_sessions_by_user_month(
-    db: Session, user_id: str, year: int, month: int
+    db: Session, user_id: uuid.UUID, year: int, month: int
 ) -> dict[DateType, GameSession]:
     """
     Retrieves all game sessions for a user within a given year and month.
@@ -123,7 +125,7 @@ def get_archived_daily_game_results_service(
     year: int,
     month: int,
     db: Session,
-    user_id: str,
+    user_id: uuid.UUID,
 ) -> GetArchivedDailyGameResultsResponse:
     """
     Gets the archived daily game results for a user for a given month.

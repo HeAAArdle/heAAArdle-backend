@@ -1,17 +1,24 @@
+# standard library
+import uuid
+
+# SQLAlchemy
 from sqlalchemy import select
 
 from sqlalchemy.orm import Session
 
+# models
 from app.models.statistics import Statistics
 
+# schemas
 from app.schemas.game import SubmitGameRequest
 
 
-def update_statistics(db: Session, payload: SubmitGameRequest):
+def update_statistics(payload: SubmitGameRequest, db: Session, user_id: uuid.UUID):
     # Decompose payload
-    user_id = payload.userID
     mode = payload.mode
+
     won = payload.won
+
     attempts = payload.attempts
 
     # Fetch existing statistics for the user and mode

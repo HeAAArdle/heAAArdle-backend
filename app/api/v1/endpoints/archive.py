@@ -1,3 +1,6 @@
+# standard library
+import uuid
+
 # FastAPI
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -29,8 +32,9 @@ def get_archived_daily_game_results(
     db: Session = Depends(get_db),
     # current_user: User = Depends(get_user),  # Uncomment once auth is available
 ):
-    # Use a placeholder user ID until authentication is available
-    user_id = "TEMPORARY_USER_ID"
+    # Placeholder user ID until auth is available: current_user
+    user_id = uuid.UUID("00000000-0000-0000-0000-000000000001")
+    # user_id = current_user.userID
 
     try:
         return get_archived_daily_game_results_service(year, month, db, user_id)

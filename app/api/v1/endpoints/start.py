@@ -1,3 +1,6 @@
+# standard library
+import uuid
+
 # FastAPI
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -27,10 +30,18 @@ router = APIRouter()
 
 
 @router.post("/start", response_model=StartGameResponse)
-def start_game(payload: StartGameRequest, db: Session = Depends(get_db)):
+def start_game(
+    payload: StartGameRequest,
+    db: Session = Depends(get_db),
+    # current_user: User = Depends(get_optional_user),  # Uncomment once auth is available
+):
+    # Placeholder user ID until auth is available: current_user
+    user_id = uuid.UUID("00000000-0000-0000-0000-000000000001")
+    # user_id = current_user.userID if current_user else None
+
     try:
         # Resolve game request
-        result = start_game_service(payload, db)
+        result = start_game_service(payload, db, user_id)
 
     except NoSongAvailable:
         raise HTTPException(404, "No song available.")
@@ -45,7 +56,7 @@ def start_game(payload: StartGameRequest, db: Session = Depends(get_db)):
     game_session_id = create_ws_game_session(
         result.song.title,
         result.song.songID,
-        payload.userID,
+        user_id,
         payload.mode,
         result.date,
         result.maximum_attempts,

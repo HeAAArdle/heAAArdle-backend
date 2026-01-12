@@ -2,15 +2,12 @@ from pydantic import BaseModel, ConfigDict, AnyUrl, Field, model_validator
 
 from app.schemas.enums import GameMode, SubmittableGameMode
 
-import uuid
-
 from datetime import date as DateType
 
 from typing import List, Literal, Optional, Annotated, Self, Union
 
 
 class StartGameRequest(BaseModel):
-    userID: Optional[uuid.UUID]
     mode: GameMode
     date: Optional[DateType]
 
@@ -28,7 +25,6 @@ class StartGameResponse(BaseModel):
 
 class SubmitGameRequest(BaseModel):
     wsGameSessionID: str
-    userID: Optional[uuid.UUID]
     mode: SubmittableGameMode
     won: bool
     attempts: Annotated[int, Field(ge=1,le=6)]

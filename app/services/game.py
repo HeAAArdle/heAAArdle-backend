@@ -184,15 +184,15 @@ class StartGameResult:
         self.date = date
 
 
-def start_game_service(payload: StartGameRequest, db: Session) -> StartGameResult:
+def start_game_service(
+    payload: StartGameRequest, db: Session, user_id: Optional[uuid.UUID]
+) -> StartGameResult:
     """
     Resolves the game request into song, expiration and attempt rules.
     """
 
     # Decompose payload
     mode = payload.mode
-
-    user_id = payload.userID
 
     date = payload.date
 
@@ -238,15 +238,13 @@ def start_game_service(payload: StartGameRequest, db: Session) -> StartGameResul
     )
 
 
-def submit_game_service(payload: SubmitGameRequest, db: Session):
+def submit_game_service(payload: SubmitGameRequest, db: Session, user_id: uuid.UUID):
     """
     Handles the submission of a game session, validates it, and updates statistics and / or leaderboards if applicable.
     """
 
     # Decompose payload
     ws_game_session_id = payload.wsGameSessionID
-
-    user_id = payload.userID
 
     mode = payload.mode
 
@@ -292,6 +290,6 @@ def submit_game_service(payload: SubmitGameRequest, db: Session):
 
     # Update stats and leaderboard if the user is logged in
     if user_id:
-        update_statistics(db=db, payload=payload)
+        update_statistics(payload, db, user_id)
 
-        update_leaderboard(db=db, payload=payload)
+        update_leaderboard(payload, db, user_id)
