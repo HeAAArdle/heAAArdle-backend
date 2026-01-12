@@ -32,6 +32,16 @@ from app.services.statistics import update_statistics
 
 from app.services.leaderboard import update_leaderboard
 
+# exceptions
+from app.services.exceptions import (
+    DailyGameNotFound,
+    DuplicateSession,
+    InvalidNumberOfAttempts,
+    NoSongAvailable,
+    SessionNotFound,
+    UserAlreadyPlayedDailyGame,
+)
+
 # utils
 from app.utils.constants import (
     MODE_AUDIO_CLIP_LENGTH,
@@ -45,31 +55,6 @@ from app.utils.helpers import (
 )
 
 from app.api.v1.endpoints.enums import Result
-
-
-# error
-class NoSongAvailable(Exception):
-    pass
-
-
-class DailyGameNotFound(Exception):
-    pass
-
-
-class UserAlreadyPlayedDailyGame(Exception):
-    pass
-
-
-class InvalidNumberOfAttempts(Exception):
-    pass
-
-
-class SessionNotFound(Exception):
-    pass
-
-
-class DuplicateSession(Exception):
-    pass
 
 
 """

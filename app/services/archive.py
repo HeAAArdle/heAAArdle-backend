@@ -21,11 +21,8 @@ from app.schemas.game import (
     UnavailableDay,
 )
 
-
-# error
-class InvalidYearOrMonth(Exception):
-    pass
-
+# exceptions
+from app.services.exceptions import InvalidYearOrMonth
 
 """
 Validators
