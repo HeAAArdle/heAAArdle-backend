@@ -1,6 +1,8 @@
 # standard library
-from datetime import date
+from datetime import date as DateType
+
 from typing import Optional
+
 import uuid
 
 # websocket
@@ -27,7 +29,7 @@ def create_ws_game_session(
     answer_song_id: uuid.UUID,
     user_id: Optional[uuid.UUID],
     mode: str,
-    date: Optional[date],
+    date: Optional[DateType],
     maximum_attempts: int,
     expires_in: int,
 ) -> str:

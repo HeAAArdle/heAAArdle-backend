@@ -2,10 +2,10 @@ from typing import Optional
 
 import uuid
 
-from datetime import date, datetime, timedelta, timezone
+from datetime import date as DateType, datetime, timedelta, timezone
 
 class GameSession:
-    def __init__(self, *, answer: str, answer_song_id: uuid.UUID, user_id: Optional[uuid.UUID], mode: str, date: Optional[date], maximum_attempts: int, expires_in: int):
+    def __init__(self, *, answer: str, answer_song_id: uuid.UUID, user_id: Optional[uuid.UUID], mode: str, date: Optional[DateType], maximum_attempts: int, expires_in: int):
         self.answer = answer.lower().strip() # correct answer (lowercase song title)
         self.answer_song_id = answer_song_id
 

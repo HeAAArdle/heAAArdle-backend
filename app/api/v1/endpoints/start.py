@@ -47,7 +47,7 @@ def start_game(payload: StartGameRequest, db: Session = Depends(get_db)):
         result.song.songID,
         payload.userID,
         payload.mode,
-        result.game_date,
+        result.date,
         result.maximum_attempts,
         result.expires_in,
     )
@@ -59,5 +59,5 @@ def start_game(payload: StartGameRequest, db: Session = Depends(get_db)):
         expiresIn=result.expires_in,
         audio=result.song.audio,
         startAt=result.start_at,
-        date=result.game_date,
+        date=result.date,
     )

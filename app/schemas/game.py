@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, AnyUrl, conint, model_validator
+from pydantic import BaseModel, ConfigDict, AnyUrl, Field, model_validator
 
 from app.schemas.enums import GameMode, SubmittableGameMode
 
@@ -12,15 +12,15 @@ from typing import List, Literal, Optional, Annotated, Self, Union
 class StartGameRequest(BaseModel):
     userID: Optional[uuid.UUID]
     mode: GameMode
-    game_date: Optional[DateType]
+    date: Optional[DateType]
 
 
 class StartGameResponse(BaseModel):
     wsGameSessionID: str
     wsURL: Annotated[str, AnyUrl]
-    expiresIn: Annotated[int, conint(ge=0)]
+    expiresIn: Annotated[int, Field(ge=0)]
     audio: Annotated[str, AnyUrl]
-    startAt: Annotated[int, conint(ge=0)]
+    startAt: Annotated[int, Field(ge=0)]
     date: Optional[DateType] # null for non-daily modes
 
     model_config = ConfigDict(from_attributes=True)
@@ -31,18 +31,18 @@ class SubmitGameRequest(BaseModel):
     userID: Optional[uuid.UUID]
     mode: SubmittableGameMode
     won: bool
-    attempts: Annotated[int, conint(ge=1)]
-    game_date: Optional[DateType]
+    attempts: Annotated[int, Field(ge=1,le=6)]
+    date: Optional[DateType]
 
     @model_validator(mode='after')
     def validate_mode_and_date(self) -> Self:
         mode = self.mode
-        game_date = self.game_date
+        date = self.date
 
-        if mode == "daily" and game_date is None:
+        if mode == "daily" and date is None:
             raise ValueError("Daily mode requires a date.")
 
-        if mode == "original" and game_date is not None:
+        if mode == "original" and date is not None:
             raise ValueError("Original mode must not have a date.")
 
         return self
@@ -64,8 +64,8 @@ Day = Union[AvailableDay, UnavailableDay]
 
 
 class GetArchivedDailyGameResultsResponse(BaseModel):
-    numberOfDays: int
-    startingDay: int
+    numberOfDays: Annotated[int, Field(ge=1, le=6)]
+    startingDay: Annotated[int, Field(ge=0, le=6)]
     days: List[Day]
 
     model_config = ConfigDict(from_attributes=True)

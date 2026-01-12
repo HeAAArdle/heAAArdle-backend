@@ -3,7 +3,7 @@ import random
 
 import uuid
 
-from datetime import date
+from datetime import date as DateType
 
 from typing import Optional
 
@@ -85,7 +85,7 @@ def assert_user_has_not_played_daily_game(db: Session, user_id: uuid.UUID):
     """
 
     # Obtain current date
-    today = date.today()
+    today = DateType.today()
 
     # Check for an existing daily game session for the user on the current date
     query = select(GameSession).where(
@@ -102,7 +102,7 @@ def assert_user_has_not_played_daily_game(db: Session, user_id: uuid.UUID):
 
 def assert_number_of_attempts_do_not_exceed_mode_maximum(mode: str, attempts: int):
     """
-    Ensures the number of attempts does not exceed the game mode-specific maximum.
+    Confirms the number of attempts does not exceed the game mode-specific maximum.
 
     Raises InvalidNumberOfAttempts if the given attempts exceed the allowed maximum for the mode.
     """
@@ -114,9 +114,9 @@ def assert_number_of_attempts_do_not_exceed_mode_maximum(mode: str, attempts: in
         raise InvalidNumberOfAttempts()
 
 
-def assert_session_is_unique(db: Session, ws_game_session_id: str):
+def assert_game_session_is_unique(db: Session, ws_game_session_id: str):
     """
-    Guarantees the uniqueness of the game session in the database.
+    Guarantees that the game session is not yet included in the database.
 
     Raises DuplicateSession if a WebSocket session with the given ID already exists.
     """
@@ -134,14 +134,14 @@ Getters
 """
 
 
-def get_daily_game(db: Session, game_date: date) -> DailyGame:
+def get_daily_game(db: Session, date: DateType) -> DailyGame:
     """
     Retrieves the daily game configuration for a specific date.
 
     Raises DailyGameNotFound if no daily game exists for the given date.
     """
 
-    query = select(DailyGame).where(DailyGame.date == game_date)
+    query = select(DailyGame).where(DailyGame.date == date)
 
     daily_game = db.scalars(query).first()
 
@@ -190,13 +190,13 @@ class StartGameResult:
         start_at: int,
         maximum_attempts: int,
         expires_in: int,
-        game_date: Optional[date]
+        date: Optional[DateType]
     ):
         self.song = song
         self.start_at = start_at
         self.maximum_attempts = maximum_attempts
         self.expires_in = expires_in
-        self.game_date = game_date
+        self.date = date
 
 
 def start_game_service(payload: StartGameRequest, db: Session) -> StartGameResult:
@@ -209,12 +209,12 @@ def start_game_service(payload: StartGameRequest, db: Session) -> StartGameResul
 
     user_id = payload.userID
 
-    game_date = payload.game_date
+    date = payload.date
 
     # Resolve game data based on mode
     if mode in {"daily", "archive"}:
         # Determine which date the daily game should be loaded from
-        date_input = game_date if (mode == "daily" and game_date) else date.today()
+        date_input = date if (mode == "daily" and date) else DateType.today()
 
         # Retrieve the daily game configuration for the resolved date
         daily_game = get_daily_game(db, date_input)
@@ -237,7 +237,7 @@ def start_game_service(payload: StartGameRequest, db: Session) -> StartGameResul
         # Randomize audio clip starting position based on mode
         start_at = get_game_mode_start_at(mode, song.duration)
 
-        game_date = None
+        date = None
 
     # Resolve session constraints specific to mode
     maximum_attempts = MODE_MAXIMUM_ATTEMPTS[mode]
@@ -249,7 +249,7 @@ def start_game_service(payload: StartGameRequest, db: Session) -> StartGameResul
         start_at=start_at,
         maximum_attempts=maximum_attempts,
         expires_in=expires_in,
-        game_date=game_date,
+        date=date,
     )
 
 
@@ -269,7 +269,7 @@ def submit_game_service(payload: SubmitGameRequest, db: Session):
 
     attempts = payload.attempts
 
-    game_date = payload.game_date
+    date = payload.date
 
     # Validate submission
 
@@ -284,7 +284,7 @@ def submit_game_service(payload: SubmitGameRequest, db: Session):
         raise SessionNotFound()
 
     # Ensure session has not already been submitted
-    assert_session_is_unique(db, ws_game_session_id)
+    assert_game_session_is_unique(db, ws_game_session_id)
 
     # Enforce daily-play restriction when applicable
     if mode == "daily" and user_id:
@@ -300,7 +300,7 @@ def submit_game_service(payload: SubmitGameRequest, db: Session):
         mode=mode,
         result=result,
         songID=ws_game_session.answer_song_id,
-        date=game_date,
+        date=date,
     )
 
     db.add(db_game_session)
