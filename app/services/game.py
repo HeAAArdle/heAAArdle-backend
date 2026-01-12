@@ -106,7 +106,7 @@ def assert_game_session_is_unique(db: Session, ws_game_session_id: str):
     Raises DuplicateSession if a WebSocket session with the given ID already exists.
     """
     # Query the database to check if the session ID already exists
-    query = select(GameSession).where(GameSession.gameSessionID == ws_game_session_id)
+    query = select(GameSession).where(GameSession.wsGameSessionID == ws_game_session_id)
 
     game_session_exists = db.scalars(query).first()
 
@@ -262,7 +262,7 @@ def submit_game_service(payload: SubmitGameRequest, db: Session, user_id: uuid.U
     # Get the WebSocket session from in-memory storage
     ws_game_session = sessions.get(ws_game_session_id)
 
-    # Confirms that a WebSocket game session exists
+    # Confirm that a WebSocket game session exists
     if not ws_game_session:
         raise SessionNotFound()
 
