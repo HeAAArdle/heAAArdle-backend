@@ -18,7 +18,8 @@ from app.models.enums import modes
 class Statistics(Base):
     __tablename__ = "statistics"
 
-    mode:          Mapped[str] = mapped_column(modes, nullable=False, index=True)
+    mode:          Mapped[str] = mapped_column(modes, primary_key=True, index=True)
+
     gamesPlayed:   Mapped[int] = mapped_column(Integer, nullable=False, index=True, default=0)
     winCount:      Mapped[int] = mapped_column(Integer, nullable=False, index=True, default=0)
     currentStreak: Mapped[int] = mapped_column(Integer, nullable=False, index=True, default=0)
@@ -38,7 +39,7 @@ class Statistics(Base):
 
     # Relationships
 
-    # Statistics <-> User: One-to-One
+    # Statistics <-> User: Many-to-One
     user: Mapped["User"] = relationship(
         "User", back_populates="statistics"
     )

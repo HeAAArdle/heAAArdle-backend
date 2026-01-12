@@ -16,8 +16,9 @@ class StartGameResponse(BaseModel):
     wsGameSessionID: str
     wsURL: Annotated[str, AnyUrl]
     expiresIn: Annotated[int, Field(ge=0)]
-    audio: Annotated[str, AnyUrl]
-    startAt: Annotated[int, Field(ge=0)]
+    audio: Optional[Annotated[str, AnyUrl]]
+    startAt: Optional[Annotated[int, Field(ge=0)]]
+    lyrics: Optional[Annotated[str, AnyUrl]]
     date: Optional[DateType] # null for non-daily modes
 
     model_config = ConfigDict(from_attributes=True)
@@ -26,9 +27,9 @@ class StartGameResponse(BaseModel):
 class SubmitGameRequest(BaseModel):
     wsGameSessionID: str
     mode: SubmittableGameMode
+    date: Optional[DateType]
     won: bool
     attempts: Annotated[int, Field(ge=1,le=6)]
-    date: Optional[DateType]
 
     @model_validator(mode='after')
     def validate_mode_and_date(self) -> Self:

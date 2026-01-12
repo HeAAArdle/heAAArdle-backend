@@ -9,7 +9,7 @@ class DailyGameNotFound(Exception):
     pass
 
 
-class UserAlreadyPlayedDailyGame(Exception):
+class UserAlreadyThePlayedDailyGame(Exception):
     pass
 
 

@@ -15,15 +15,17 @@ from app.db.get_db import get_db
 # schemas
 from app.schemas.game import StartGameRequest, StartGameResponse
 
+# websocket
+from app.ws.session_manager import create_ws_game_session
+
 # services
-from app.services.game import (
+from app.services.game.game import start_game_service
+
+from app.services.exceptions import (
     NoSongAvailable,
     DailyGameNotFound,
-    UserAlreadyPlayedDailyGame,
-    start_game_service,
+    UserAlreadyThePlayedDailyGame,
 )
-
-from app.services.session import create_ws_game_session
 
 
 router = APIRouter()
@@ -49,15 +51,17 @@ def start_game(
     except DailyGameNotFound:
         raise HTTPException(404, "No song available for the selected date.")
 
-    except UserAlreadyPlayedDailyGame:
+    except UserAlreadyThePlayedDailyGame:
         raise HTTPException(403, "User has already played today's Heardle.")
+
+    mode = payload.mode
 
     # Create a new WebSocket game session and return its ID
     game_session_id = create_ws_game_session(
         result.song.title,
         result.song.songID,
         user_id,
-        payload.mode,
+        mode,
         result.date,
         result.maximum_attempts,
         result.expires_in,
@@ -68,7 +72,8 @@ def start_game(
         wsGameSessionID=game_session_id,
         wsURL=f"wss://{settings.host}/{settings.websocket_endpoint_prefix}/{game_session_id}",
         expiresIn=result.expires_in,
-        audio=result.song.audio,
-        startAt=result.start_at,
+        audio=result.song.audio if mode != "lyrics" else None,
+        startAt=result.start_at if mode != "lyrics" else None,
+        lyrics=result.song.lyrics if mode == "lyrics" else None,
         date=result.date,
     )

@@ -32,7 +32,7 @@ class User(Base):
         "GameSession", back_populates="user", uselist=False
     )
 
-    # User <-> Statistics: One-to-One
+    # User <-> Statistics: One-to-Many
     statistics: Mapped["Statistics"] = relationship(
         "Statistics", back_populates="user"
     )

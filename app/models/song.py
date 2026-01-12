@@ -24,8 +24,8 @@ class Song(Base):
     title:       Mapped[str] = mapped_column(String, nullable=False, index=True)
     releaseYear: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
     album:       Mapped[str] = mapped_column(String, nullable=True, index=True)
-    link:        Mapped[str] = mapped_column(String, unique=True, nullable=False)
-    audio:       Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    shareLink:   Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    audioLink:   Mapped[str] = mapped_column(String, unique=True, nullable=False)
     lyrics:      Mapped[str] = mapped_column(Text, nullable=False) # long text; no index because of size
     duration:    Mapped[int] = mapped_column(Integer, nullable=False, index=True)
 

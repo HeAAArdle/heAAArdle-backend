@@ -14,10 +14,9 @@ from app.db.get_db import get_db
 from app.schemas.game import GetArchivedDailyGameResultsResponse
 
 # services
-from app.services.archive import (
-    InvalidYearOrMonth,
-    get_archived_daily_game_results_service,
-)
+from app.services.exceptions import InvalidYearOrMonth
+
+from app.services.archive.archive import get_archived_daily_game_results_service
 
 
 router = APIRouter()

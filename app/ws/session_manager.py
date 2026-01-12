@@ -9,11 +9,12 @@ import uuid
 from app.ws.session import sessions, GameSession
 
 
-def create_unique_ws_game_session_id(sessions: dict[str, GameSession]) -> str:
+def create_ws_game_session_id(sessions: dict[str, GameSession]) -> str:
     """
-    Generates a unique WebSocket game session ID.
+    Generate a unique WebSocket game session ID.
 
-    Returns a UUID string that does not collide with existing game session IDs.
+    Returns:
+        A UUID string that does not collide with existing session IDs.
     """
 
     # Generate IDs until a non-colliding one is found
@@ -34,15 +35,16 @@ def create_ws_game_session(
     expires_in: int,
 ) -> str:
     """
-    Makes and stores an in-memory WebSocket game session.
+    Make and store an in-memory WebSocket game session.
 
-    Returns the ID of the created WebSocket game session.
+    Returns:
+        The ID of the created WebSocket game session.
     """
 
-    # Generate a unique identifier for the new WebSocket session
-    game_session_id = create_unique_ws_game_session_id(sessions)
+    # Generate a unique identifier for the WebSocket session
+    game_session_id = create_ws_game_session_id(sessions)
 
-    # Persist the session state in memory for active WebSocket connections
+    # Store the session state for active WebSocket connections
     sessions[game_session_id] = GameSession(
         answer=answer,
         answer_song_id=answer_song_id,
@@ -58,32 +60,34 @@ def create_ws_game_session(
 
 def check_guess(game_session_id: str, guess: str) -> dict[str, str | bool]:
     """
-    Validates a user's guess.
+    Validate a user's guess against the active WebSocket game session.
 
-    Returns a dictionary containing a boolean value indicating whether the
-    game is over and whether the user guessed the answer correctly.
+    Returns:
+        A result payload indicating whether the guess is
+        correct and whether the game session is complete.
     """
-    # Retrieve the session
+
+    # Retrieve the active game session
     session = sessions[game_session_id]
 
-    # If the session is already done, return done response immediately
+    # Immediately return if the session has already ended
     if session.done == True:
         return {"type": "result", "is_correct": False, "done": True}
 
-    # Update attempts count
+    # Increment the number of attempts for this session
     session.attempts += 1
 
-    # Check if the guess is correct by comparing normalized strings of the guess and the answer (titles)
-    is_correct = guess.lower().strip() == session.answer.lower().strip()
+    # Check if the guess is correct by comparing normalized strings of the guess and the answer
+    is_correct = guess.lower() == session.answer
 
-    # Determine if the game is done
+    # Determine whether the game should end
     if is_correct or session.attempts >= session.maximum_attempts:
         done = True
 
-        # Mark the session as done
+        # Mark the session as completed
         session.done = True
     else:
         done = False
 
-    # Prepare the response
+    # Return the result of the guess
     return {"type": "result", "is_correct": is_correct, "done": done}

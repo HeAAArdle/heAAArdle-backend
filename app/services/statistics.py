@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 # models
-from app.models.statistics import Statistics
+from app.models import *
 
 # schemas
 from app.schemas.game import SubmitGameRequest

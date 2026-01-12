@@ -10,6 +10,10 @@ class Settings(BaseSettings):
 
     direct_url: Optional[str] = None
 
+    supabase_url: Optional[str] = None
+
+    supabase_key: Optional[str] = None
+
     host: Optional[str] = None
 
     websocket_endpoint_prefix: Optional[str] = None

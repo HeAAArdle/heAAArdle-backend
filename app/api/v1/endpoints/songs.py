@@ -7,8 +7,6 @@ from sqlalchemy.orm import Session
 # app core
 from app.db.get_db import get_db
 
-# models
-
 # schemas
 from app.schemas.song import GetAllSongResponse
 

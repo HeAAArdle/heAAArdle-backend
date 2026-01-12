@@ -1,14 +1,19 @@
+# standard library
+from datetime import datetime, timezone
+
+# FastAPI
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
+# websocket
 from app.ws.connection_manager import manager
 
 from app.ws.session import sessions
 
-from app.services.session import check_guess
+from app.ws.session_manager import check_guess
 
-from datetime import datetime, timezone
 
 router = APIRouter()
+
 
 @router.websocket("/{game_session_id}")
 async def game_ws(websocket: WebSocket, game_session_id: str):
