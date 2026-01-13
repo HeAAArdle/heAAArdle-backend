@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, AnyUrl, Field, model_validator
+from pydantic import BaseModel, ConfigDict, HttpUrl, AnyUrl, Field, model_validator
 
 from app.schemas.enums import GameMode, SubmittableGameMode
 
@@ -26,8 +26,8 @@ class AudioStartGameResponse(BaseStartGameResponse):
         GameMode.RAPID,
         GameMode.ARCHIVE,
     ]
-    audio: str
-    audioStartAt: int
+    audio: Annotated[str, HttpUrl]
+    audioStartAt: Annotated[int, Field(ge=0)]
 
 
 class LyricsStartGameResponse(BaseStartGameResponse):
