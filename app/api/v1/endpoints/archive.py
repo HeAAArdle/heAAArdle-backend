@@ -23,7 +23,7 @@ router = APIRouter()
 
 
 @router.get(
-    "/?year={year}&month={month}", response_model=GetArchivedDailyGameResultsResponse
+    "/", response_model=GetArchivedDailyGameResultsResponse
 )
 def get_archived_daily_game_results(
     year: int,

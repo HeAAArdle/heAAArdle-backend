@@ -6,6 +6,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 import uuid
 
+from datetime import date as DateType
+
 from app.db.base import Base
 
 from typing import TYPE_CHECKING
@@ -38,7 +40,7 @@ class GameSession(Base):
     songID: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), nullable=True, index=True
     )
-    date: Mapped[Date] = mapped_column(Date, nullable=True, index=True)
+    date: Mapped[DateType] = mapped_column(Date, nullable=True, index=True)
 
     # Relationships
 

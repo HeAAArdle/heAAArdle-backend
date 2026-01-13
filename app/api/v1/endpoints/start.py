@@ -72,7 +72,7 @@ def start_game(
         wsGameSessionID=game_session_id,
         wsURL=f"wss://{settings.host}/{settings.websocket_endpoint_prefix}/{game_session_id}",
         expiresIn=result.expires_in,
-        audio=result.song.audio if mode != "lyrics" else None,
+        audio=result.song.audioLink if mode != "lyrics" else None,
         startAt=result.start_at if mode != "lyrics" else None,
         lyrics=result.song.lyrics if mode == "lyrics" else None,
         date=result.date,

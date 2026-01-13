@@ -16,9 +16,9 @@ class StartGameResponse(BaseModel):
     wsGameSessionID: str
     wsURL: Annotated[str, AnyUrl]
     expiresIn: Annotated[int, Field(ge=0)]
-    audio: Optional[Annotated[str, AnyUrl]]
+    audio: Optional[str]
     startAt: Optional[Annotated[int, Field(ge=0)]]
-    lyrics: Optional[Annotated[str, AnyUrl]]
+    lyrics: Optional[str]
     date: Optional[DateType] # null for non-daily modes
 
     model_config = ConfigDict(from_attributes=True)
@@ -61,7 +61,7 @@ Day = Union[AvailableDay, UnavailableDay]
 
 
 class GetArchivedDailyGameResultsResponse(BaseModel):
-    numberOfDays: Annotated[int, Field(ge=1, le=6)]
+    numberOfDays: Annotated[int, Field(ge=1, le=31)]
     startingDay: Annotated[int, Field(ge=0, le=6)]
     days: List[Day]
 

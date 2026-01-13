@@ -14,8 +14,8 @@ MODE_MAXIMUM_ATTEMPTS = {
 }
 
 MODE_EXPIRES_IN = {
-    "original": 15,
-    "rapid": 2,
-    "lyrics": 2,
-    "archive": 15,
+    "original": 16,
+    "rapid": 3,
+    "lyrics": 3,
+    "archive": 16,
 }

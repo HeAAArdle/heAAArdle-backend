@@ -10,7 +10,10 @@ from app.schemas.game import GetArchivedDailyGameResultsResponse
 # services
 from app.services.archive.archive_domain import create_days_list
 
-from app.services.archive.archive_provider import get_daily_game_sessions_by_user_id_and_month
+from app.services.archive.archive_provider import (
+    get_daily_game_dates_by_month,
+    get_daily_game_sessions_by_user_id_and_month,
+)
 
 from app.services.archive.archive_validator import validate_year_and_month
 
@@ -28,13 +31,18 @@ def get_archived_daily_game_results_service(
     # Validate year and month
     starting_day, number_of_days = validate_year_and_month(year, month)
 
-    # Get all game sessions for the user within the month
+    # Get all dates in the month where a daily game was available
+    daily_game_dates = get_daily_game_dates_by_month(db, year, month)
+
+    # Retrieve daily game sessions played by the user during the month
     daily_game_sessions = get_daily_game_sessions_by_user_id_and_month(
         db, user_id, year, month
     )
 
-    # Build the list of days with availability and results
-    days = create_days_list(year, month, number_of_days, daily_game_sessions)
+    # Construct the per-day availability and result list for the response
+    days = create_days_list(
+        year, month, number_of_days, daily_game_dates, daily_game_sessions
+    )
 
     return GetArchivedDailyGameResultsResponse(
         numberOfDays=number_of_days,

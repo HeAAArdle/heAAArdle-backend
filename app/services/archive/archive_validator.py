@@ -19,5 +19,5 @@ def validate_year_and_month(year: int, month: int) -> tuple[int, int]:
     try:
         return calendar.monthrange(year, month)
 
-    except Exception:
+    except calendar.IllegalMonthError:
         raise InvalidYearOrMonth()

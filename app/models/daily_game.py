@@ -6,6 +6,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 import uuid
 
+from datetime import date as DateType
+
 from app.db.base import Base
 
 from typing import TYPE_CHECKING
@@ -17,7 +19,7 @@ if TYPE_CHECKING:
 class DailyGame(Base):
     __tablename__ = "daily_games"
 
-    date: Mapped[Date] = mapped_column(Date, primary_key=True)
+    date: Mapped[DateType] = mapped_column(Date, primary_key=True)
 
     startAt: Mapped[int] = mapped_column(Integer, nullable=False)
 
