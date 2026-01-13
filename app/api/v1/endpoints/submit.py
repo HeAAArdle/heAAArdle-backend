@@ -19,7 +19,7 @@ from app.services.exceptions import (
     InvalidNumberOfAttempts,
     SessionNotFound,
     DuplicateSession,
-    UserAlreadyThePlayedDailyGame,
+    UserAlreadyPlayedTheDailyGame,
 )
 
 
@@ -49,7 +49,7 @@ def submit_game(
     except DuplicateSession:
         raise HTTPException(409, "Result already submitted for this session.")
 
-    except UserAlreadyThePlayedDailyGame:
+    except UserAlreadyPlayedTheDailyGame:
         raise HTTPException(403, "User has already played today's daily game.")
 
     # No response body needed for successful submission

@@ -11,8 +11,10 @@ from sqlalchemy.orm import Session
 # models
 from app.models import *
 
+today = DateType.today()
 
-def get_daily_game_dates_by_month(
+
+def get_archived_daily_game_dates_by_month(
     db: Session,
     year: int,
     month: int,
@@ -29,6 +31,7 @@ def get_daily_game_dates_by_month(
         select(DailyGame.date)
         .where(func.extract("year", DailyGame.date) == year)
         .where(func.extract("month", DailyGame.date) == month)
+        .where(DailyGame.date < today)
     )
 
     daily_game_dates = db.scalars(query).all()
@@ -36,7 +39,7 @@ def get_daily_game_dates_by_month(
     return [date for date in daily_game_dates]
 
 
-def get_daily_game_sessions_by_user_id_and_month(
+def get_archived_daily_game_sessions_by_user_id_and_month(
     db: Session, user_id: uuid.UUID, year: int, month: int
 ) -> dict[DateType, GameSession]:
     """
@@ -52,6 +55,7 @@ def get_daily_game_sessions_by_user_id_and_month(
         .where(GameSession.userID == user_id)
         .where(func.extract("year", GameSession.date) == year)
         .where(func.extract("month", GameSession.date) == month)
+        .where(GameSession.date < today)
     )
 
     daily_game_sessions = db.scalars(query).all()

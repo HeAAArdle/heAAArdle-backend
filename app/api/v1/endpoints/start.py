@@ -13,7 +13,14 @@ from app.core.config import settings
 from app.db.get_db import get_db
 
 # schemas
-from app.schemas.game import StartGameRequest, StartGameResponse
+from app.schemas.game import (
+    AudioStartGameResponse,
+    LyricsStartGameResponse,
+    StartGameRequest,
+    StartGameResponse,
+)
+
+from app.schemas.enums import GameMode
 
 # websocket
 from app.ws.session_manager import create_ws_game_session
@@ -21,10 +28,15 @@ from app.ws.session_manager import create_ws_game_session
 # services
 from app.services.game.game import start_game_service
 
+from app.services.song import get_signed_audio_link
+
 from app.services.exceptions import (
+    ArchiveDateNotProvided,
+    DateIsInTheFuture,
+    DateProvided,
     NoSongAvailable,
     DailyGameNotFound,
-    UserAlreadyThePlayedDailyGame,
+    UserAlreadyPlayedTheDailyGame,
 )
 
 
@@ -45,35 +57,86 @@ def start_game(
         # Resolve game request
         result = start_game_service(payload, db, user_id)
 
+    # Translate domain-specific errors into HTTP responses
+    except ArchiveDateNotProvided:
+        raise HTTPException(404, "Archive mode requires a date.")
+
+    except DateIsInTheFuture:
+        raise HTTPException(404, "Date cannot be in the future.")
+
+    except DateProvided:
+        raise HTTPException(404, "Non-archive modes should not have a date.")
+
     except NoSongAvailable:
-        raise HTTPException(404, "No song available.")
+        raise HTTPException(404, "No song available in the database.")
 
     except DailyGameNotFound:
         raise HTTPException(404, "No song available for the selected date.")
 
-    except UserAlreadyThePlayedDailyGame:
+    except UserAlreadyPlayedTheDailyGame:
         raise HTTPException(403, "User has already played today's Heardle.")
 
     mode = payload.mode
 
+    # Resolve the correct answer used for guess validation
+    answer = (
+        result.lyrics_answer if payload.mode == GameMode.LYRICS else result.song.title
+    )
+
+    assert answer is not None
+
     # Create a new WebSocket game session and return its ID
-    game_session_id = create_ws_game_session(
-        result.song.title,
+    ws_game_session_id = create_ws_game_session(
+        answer,
         result.song.songID,
         user_id,
         mode,
         result.date,
         result.maximum_attempts,
-        result.expires_in,
+        result.expires_in_minutes,
     )
 
-    # Return session metadata and playback configuration
-    return StartGameResponse(
-        wsGameSessionID=game_session_id,
-        wsURL=f"wss://{settings.host}/{settings.websocket_endpoint_prefix}/{game_session_id}",
-        expiresIn=result.expires_in,
-        audio=result.song.audioLink if mode != "lyrics" else None,
-        startAt=result.start_at if mode != "lyrics" else None,
-        lyrics=result.song.lyrics if mode == "lyrics" else None,
-        date=result.date,
-    )
+    # Construct the WebSocket connection URL for the client
+    ws_url = f"wss://{settings.host}/{settings.websocket_endpoint_prefix}/{ws_game_session_id}"
+
+    expires_in_minutes = result.expires_in_minutes
+
+    if mode == GameMode.LYRICS:
+        # Lyrics mode requires pre-generated lyrics content
+        if result.lyrics_given is None:
+            raise HTTPException(
+                500, "Lyrics game mode has no generated lyrics to display."
+            )
+
+        # Return the start response for lyrics-based gameplay
+        return LyricsStartGameResponse(
+            wsGameSessionID=ws_game_session_id,
+            wsURL=ws_url,
+            expiresInMinutes=expires_in_minutes,
+            mode=mode,
+            lyrics=result.lyrics_given,
+            date=None,
+        )
+
+    else:
+        # Audio-based modes require both a start time and audio source
+        if result.audio_start_at is None or not result.song.audioLink:
+            raise HTTPException(
+                500, f"{mode} game mode has no audio or start time available."
+            )
+
+        # Generate a signed URL for more secure audio playback
+        audio = get_signed_audio_link(mode, result.song.audioLink)
+
+        date = result.date
+
+        # Return the start response for audio-based gameplay
+        return AudioStartGameResponse(
+            wsGameSessionID=ws_game_session_id,
+            wsURL=ws_url,
+            expiresInMinutes=expires_in_minutes,
+            mode=mode,
+            audio=audio,
+            audioStartAt=result.audio_start_at,
+            date=date,
+        )

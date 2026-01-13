@@ -1,23 +1,17 @@
 # standard library
 import random
 
-from datetime import date as DateType
-
-# SQLAlchemy
-from sqlalchemy import select
-
-from sqlalchemy.orm import Session
-
 # models
 from app.models import *
 
-# exceptions
-from app.services.exceptions import DailyGameNotFound
+# schemas
+from app.schemas.enums import GameMode
 
 # utils
 from app.utils.constants import (
     MODE_AUDIO_CLIP_LENGTH,
-    MODE_EXPIRES_IN,
+    MODE_MAXIMUM_ATTEMPTS,
+    MODE_EXPIRES_IN_MINUTES,
 )
 
 from app.utils.helpers import (
@@ -26,26 +20,7 @@ from app.utils.helpers import (
 )
 
 
-def get_daily_game(db: Session, date: DateType) -> DailyGame:
-    """
-    Retrieve the daily game configuration for a specific date.
-
-    Raises:
-        DailyGameNotFound: If no daily game exists for the given date.
-    """
-
-    # Query the database for the daily game on the specified date
-    query = select(DailyGame).where(DailyGame.date == date)
-
-    daily_game = db.scalars(query).first()
-
-    if not daily_game:
-        raise DailyGameNotFound()
-
-    return daily_game
-
-
-def get_start_at_by_game_mode(mode: str, song_duration: int) -> int:
+def get_audio_start_at_by_game_mode(mode: GameMode, song_duration: int) -> int:
     """
     Compute a valid random starting position (in seconds) for a game mode's audio clip.
 
@@ -61,16 +36,23 @@ def get_start_at_by_game_mode(mode: str, song_duration: int) -> int:
     return random.randint(0, maximum_start_at)
 
 
-def get_expires_in_by_game_mode(mode: str) -> int:
+def get_maximum_attempts_by_game_mode(mode: GameMode) -> int:
+    maximum_attempts = MODE_MAXIMUM_ATTEMPTS[mode]
+
+    return maximum_attempts
+
+
+def get_expires_in_minutes_by_game_mode(mode: GameMode) -> int:
     """
     Determine the session expiration time (in minutes) for a given game mode.
 
     Daily sessions expire at the end of the current day; other modes use predefined durations.
     """
 
-    if mode == "daily":
+    if mode == GameMode.DAILY:
         # Daily sessions expire at the end of the current day
         return calculate_time_in_minutes(get_time_until_end_of_day())
+
     else:
         # Non-daily sessions utilize a predefined expiration duration
-        return MODE_EXPIRES_IN[mode]
+        return MODE_EXPIRES_IN_MINUTES[mode]

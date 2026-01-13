@@ -5,6 +5,9 @@ from typing import Optional
 
 import uuid
 
+# schemas
+from app.schemas.enums import GameMode
+
 # websocket
 from app.ws.session import sessions, GameSession
 
@@ -29,10 +32,10 @@ def create_ws_game_session(
     answer: str,
     answer_song_id: uuid.UUID,
     user_id: Optional[uuid.UUID],
-    mode: str,
+    mode: GameMode,
     date: Optional[DateType],
     maximum_attempts: int,
-    expires_in: int,
+    expires_in_minutes: int,
 ) -> str:
     """
     Make and store an in-memory WebSocket game session.
@@ -52,7 +55,7 @@ def create_ws_game_session(
         mode=mode,
         date=date,
         maximum_attempts=maximum_attempts,
-        expires_in=expires_in,
+        expires_in_minutes=expires_in_minutes,
     )
 
     return game_session_id
@@ -86,6 +89,7 @@ def check_guess(game_session_id: str, guess: str) -> dict[str, str | bool]:
 
         # Mark the session as completed
         session.done = True
+
     else:
         done = False
 

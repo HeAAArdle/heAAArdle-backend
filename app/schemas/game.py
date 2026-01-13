@@ -12,16 +12,32 @@ class StartGameRequest(BaseModel):
     date: Optional[DateType]
 
 
-class StartGameResponse(BaseModel):
+class BaseStartGameResponse(BaseModel):
     wsGameSessionID: str
     wsURL: Annotated[str, AnyUrl]
-    expiresIn: Annotated[int, Field(ge=0)]
-    audio: Optional[str]
-    startAt: Optional[Annotated[int, Field(ge=0)]]
-    lyrics: Optional[str]
-    date: Optional[DateType] # null for non-daily modes
+    expiresInMinutes: Annotated[int, Field(ge=0)]
+    date: Optional[DateType]
 
-    model_config = ConfigDict(from_attributes=True)
+
+class AudioStartGameResponse(BaseStartGameResponse):
+    mode: Literal[
+        GameMode.ORIGINAL,
+        GameMode.DAILY,
+        GameMode.RAPID,
+        GameMode.ARCHIVE,
+    ]
+    audio: str
+    audioStartAt: int
+
+
+class LyricsStartGameResponse(BaseStartGameResponse):
+    mode: Literal[GameMode.LYRICS]
+    lyrics: str
+
+
+StartGameResponse = Annotated[
+    Union[AudioStartGameResponse, LyricsStartGameResponse], Field(discriminator="mode")
+]
 
 
 class SubmitGameRequest(BaseModel):
@@ -29,17 +45,17 @@ class SubmitGameRequest(BaseModel):
     mode: SubmittableGameMode
     date: Optional[DateType]
     won: bool
-    attempts: Annotated[int, Field(ge=1,le=6)]
+    attempts: Annotated[int, Field(ge=1, le=6)]
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def validate_mode_and_date(self) -> Self:
         mode = self.mode
         date = self.date
 
-        if mode == "daily" and date is None:
+        if mode == SubmittableGameMode.DAILY and date is None:
             raise ValueError("Daily mode requires a date.")
 
-        if mode == "original" and date is not None:
+        if mode == SubmittableGameMode.ORIGINAL and date is not None:
             raise ValueError("Original mode must not have a date.")
 
         return self

@@ -1,21 +1,23 @@
+from app.schemas.enums import GameMode
+
 MODE_AUDIO_CLIP_LENGTH = {
-    "original": 16,
-    "daily": 16,
-    "rapid": 3,
-    "archive": 16,
+    GameMode.ORIGINAL: 16,
+    GameMode.DAILY: 16,
+    GameMode.RAPID: 3,
+    GameMode.ARCHIVE: 16,
 }
 
 MODE_MAXIMUM_ATTEMPTS = {
-    "original": 6,
-    "daily": 6,
-    "rapid": 1,
-    "lyrics": 1,
-    "archive": 6,
+    GameMode.ORIGINAL: 6,
+    GameMode.DAILY: 6,
+    GameMode.RAPID: 1,
+    GameMode.LYRICS: 1,
+    GameMode.ARCHIVE: 6,
 }
 
-MODE_EXPIRES_IN = {
-    "original": 16,
-    "rapid": 3,
-    "lyrics": 3,
-    "archive": 16,
+MODE_EXPIRES_IN_MINUTES = {
+    GameMode.ORIGINAL: 16,
+    GameMode.RAPID: 3,
+    GameMode.LYRICS: 3,
+    GameMode.ARCHIVE: 16,
 }

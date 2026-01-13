@@ -8,6 +8,7 @@ class GameMode(str, Enum):
     LYRICS = "lyrics"
     ARCHIVE = "archive"
 
+
 class SubmittableGameMode(str, Enum):
     ORIGINAL = "original"
     DAILY = "daily"

@@ -1,6 +1,18 @@
 # Game
 
 
+class ArchiveDateNotProvided(Exception):
+    pass
+
+
+class DateIsInTheFuture(Exception):
+    pass
+
+
+class DateProvided(Exception):
+    pass
+
+
 class NoSongAvailable(Exception):
     pass
 
@@ -9,7 +21,7 @@ class DailyGameNotFound(Exception):
     pass
 
 
-class UserAlreadyThePlayedDailyGame(Exception):
+class UserAlreadyPlayedTheDailyGame(Exception):
     pass
 
 
