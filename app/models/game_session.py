@@ -8,9 +8,7 @@ import uuid
 
 from app.db.base import Base
 
-# from app.models.user import User
-# from app.models.daily_game import DailyGame
-
+from app.models.daily_game import DailyGame
 from app.models.enums import results
 
 class GameSession(Base):

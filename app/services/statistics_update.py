@@ -1,0 +1,45 @@
+from sqlalchemy.orm import Session
+from app.models.statistics import Statistics
+
+def update_statistics_after_game(db: Session, user_id: str, mode: str, did_win: bool, guesses: int) -> None:
+    try:
+        stats = db.query(Statistics).filter(Statistics.userID == user_id, Statistics.mode == mode).with_for_update().one()
+
+        _increment_games_played(stats)
+        _update_win_and_streaks(stats, did_win)
+        _update_guess_distribution(stats, guesses)
+
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
+def _increment_games_played(stats: Statistics) -> None:
+    stats.gamesPlayed += 1
+
+def _update_win_and_streaks(stats: Statistics, did_win: bool) -> None:
+    if did_win:
+        stats.winCount += 1
+        stats.currentStreak += 1
+
+        if stats.currentStreak > stats.maximumStreak:
+            stats.maximumStreak = stats.currentStreak
+    else:
+        stats.currentStreak = 0
+
+def _update_guess_distribution(stats: Statistics, guesses: int) -> None:
+    if guesses < 1 or guesses > 6:
+        raise ValueError("Guesses must be between 1 and 6")
+
+    if guesses == 1:
+        stats.guesses1 += 1
+    elif guesses == 2:
+        stats.guesses2 += 1
+    elif guesses == 3:
+        stats.guesses3 += 1
+    elif guesses == 4:
+        stats.guesses4 += 1
+    elif guesses == 5:
+        stats.guesses5 += 1
+    elif guesses == 6:
+        stats.guesses6 += 1

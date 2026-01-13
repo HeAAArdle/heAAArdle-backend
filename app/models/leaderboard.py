@@ -2,8 +2,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 
-# from app.models.user__leaderboard import UserLeaderboard
-
 from app.models.enums import modes, period
 
 class Leaderboard(Base):

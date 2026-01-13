@@ -8,8 +8,7 @@ import uuid
 
 from app.db.base import Base
 
-# from app.models.song import Song
-# from app.models.game_session import GameSession
+from app.models.song import Song
 
 class DailyGame(Base):
     __tablename__ = "daily_games"

@@ -8,8 +8,6 @@ import uuid
 
 from app.db.base import Base
 
-# from app.models.song__artist import SongArtist
-
 class Artist(Base):
     __tablename__ = "artists"
 

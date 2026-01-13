@@ -8,9 +8,8 @@ import uuid
 
 from app.db.base import Base
 
-# from app.models.game_session import GameSession
-# from app.models.statistics import Statistics
-# from app.models.user__leaderboard import UserLeaderboard
+from app.models.game_session import GameSession
+from app.models.user__leaderboard import UserLeaderboard
 
 class User(Base):
     __tablename__ = "users"

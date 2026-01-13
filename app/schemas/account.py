@@ -2,9 +2,9 @@ from pydantic import BaseModel
 from typing import Tuple
 
 class GetUserStatisticsRequest(BaseModel):
-    token: str
+    token: str | None
 
-class GameDetails(BaseModel):
+class Statistics(BaseModel):
     gamesPlayed: int
     winCount: int
     winPercentage: int
@@ -13,12 +13,12 @@ class GameDetails(BaseModel):
     guessDistribution: Tuple[int, int, int, int, int, int]
 
 class GetUserStatisticsResponse(BaseModel):
-    original: GameDetails
-    daily: GameDetails
+    original: Statistics
+    daily: Statistics
 
 class GetUserResponse(BaseModel):
     username: str
-    token: str
+    token: str | None
 
 class SignInRequest(BaseModel):
     username: str
@@ -26,7 +26,7 @@ class SignInRequest(BaseModel):
 
 class SignInResponse(BaseModel):
     username: str
-    token: str
+    token: str | None
 
 class SignUpRequest(BaseModel):
     username: str
@@ -34,4 +34,4 @@ class SignUpRequest(BaseModel):
 
 class SignUpResponse(BaseModel):
     username: str
-    token: str
+    token: str | None
