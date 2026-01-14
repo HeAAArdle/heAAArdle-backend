@@ -75,7 +75,7 @@ def check_guess(game_session_id: str, guess: str) -> dict[str, str | bool]:
 
     # Immediately return if the session has already ended
     if session.done == True:
-        return {"type": "result", "is_correct": False, "done": True}
+        return {"type": "result", "is_correct": False, "done": True, "guess": guess}
 
     # Increment the number of attempts for this session
     session.attempts += 1
@@ -94,4 +94,4 @@ def check_guess(game_session_id: str, guess: str) -> dict[str, str | bool]:
         done = False
 
     # Return the result of the guess
-    return {"type": "result", "is_correct": is_correct, "done": done}
+    return {"type": "result", "is_correct": is_correct, "done": done, "guess": guess}

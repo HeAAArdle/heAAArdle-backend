@@ -1,10 +1,10 @@
-from pydantic import BaseModel, ConfigDict, HttpUrl, AnyUrl, Field, model_validator
+from pydantic import BaseModel, ConfigDict, HttpUrl, AnyWebsocketUrl, Field
 
 from app.schemas.enums import GameMode, SubmittableGameMode
 
 from datetime import date as DateType
 
-from typing import List, Literal, Optional, Annotated, Self, Union
+from typing import List, Literal, Optional, Annotated, Union
 
 
 class StartGameRequest(BaseModel):
@@ -14,7 +14,7 @@ class StartGameRequest(BaseModel):
 
 class BaseStartGameResponse(BaseModel):
     wsGameSessionID: str
-    wsURL: Annotated[str, AnyUrl]
+    wsURL: Annotated[str, AnyWebsocketUrl]
     expiresInMinutes: Annotated[int, Field(ge=0)]
     date: Optional[DateType]
 
@@ -43,22 +43,8 @@ StartGameResponse = Annotated[
 class SubmitGameRequest(BaseModel):
     wsGameSessionID: str
     mode: SubmittableGameMode
-    date: Optional[DateType]
     won: bool
     attempts: Annotated[int, Field(ge=1, le=6)]
-
-    @model_validator(mode="after")
-    def validate_mode_and_date(self) -> Self:
-        mode = self.mode
-        date = self.date
-
-        if mode == SubmittableGameMode.DAILY and date is None:
-            raise ValueError("Daily mode requires a date.")
-
-        if mode == SubmittableGameMode.ORIGINAL and date is not None:
-            raise ValueError("Original mode must not have a date.")
-
-        return self
 
 
 class UnavailableDay(BaseModel):

@@ -32,7 +32,7 @@ from app.services.song import get_signed_audio_link
 
 from app.services.exceptions import (
     ArchiveDateNotProvided,
-    DateIsInTheFuture,
+    DateIsTodayOrInTheFuture,
     DateProvided,
     NoSongAvailable,
     DailyGameNotFound,
@@ -58,12 +58,6 @@ def start_game(
         result = start_game_service(payload, db, user_id)
 
     # Translate domain-specific errors into HTTP responses
-    except ArchiveDateNotProvided:
-        raise HTTPException(404, "Archive mode requires a date.")
-
-    except DateIsInTheFuture:
-        raise HTTPException(404, "Date cannot be in the future.")
-
     except DateProvided:
         raise HTTPException(404, "Non-archive modes should not have a date.")
 
@@ -75,6 +69,18 @@ def start_game(
 
     except UserAlreadyPlayedTheDailyGame:
         raise HTTPException(403, "User has already played today's Heardle.")
+
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error))
+
+    except IndexError as error:
+        raise HTTPException(status_code=400, detail=str(error))
+
+    except ArchiveDateNotProvided:
+        raise HTTPException(404, "Archive mode requires a date.")
+
+    except DateIsTodayOrInTheFuture:
+        raise HTTPException(404, "Date cannot be in the future.")
 
     mode = payload.mode
 

@@ -16,8 +16,9 @@ from app.schemas.enums import GameMode
 
 # exceptions
 from app.services.exceptions import (
+    ArchiveDateNotProvided,
     DateProvided,
-    DateIsInTheFuture,
+    DateIsTodayOrInTheFuture,
     DuplicateSession,
     InvalidNumberOfAttempts,
     UserAlreadyPlayedTheDailyGame,
@@ -27,31 +28,40 @@ from app.services.exceptions import (
 from app.services.game.game_domain import get_maximum_attempts_by_game_mode
 
 
-def assert_date_is_not_in_the_future(date: DateType, today: DateType):
+def assert_date_is_not_today_or_in_the_future(date: DateType):
     """
-    Ensure that the provided date is not in the future.
+    Ensure that the given date is not today or in the future.
 
     Raises:
-        DateIsInTheFuture: If the date is later than today.
+        DateIsTodayOrInTheFuture: If the date is later than yesterday.
     """
 
-    # Check if the given date occurs after the current date
-    if date > today:
-        raise DateIsInTheFuture()
+    # Get today's date
+    today = DateType.today()
+
+    # Check if the given date occurs on the same day or after the current date
+    if date >= today:
+        raise DateIsTodayOrInTheFuture()
 
 
-def assert_date_is_not_given_for_non_archive_modes(date: DateType | None):
+def assert_date_is_valid_for_mode(date: DateType | None, mode: GameMode):
     """
-    Ensure that no date is provided for modes that do not accept one.
+    Ensure date rules are respected for each game mode.
 
     Raises:
+        ArchiveDateNotProvided: If no date is given for an archive mode game.
+    
         DateProvided: If a date is given for a non-daily or non-archive mode.
     """
 
-    # Raise an error if a date is provided for a mode that does not accept it
-    if date is not None:
-        raise DateProvided()
+    if mode == GameMode.ARCHIVE:
+        if date is None:
+            raise ArchiveDateNotProvided()
 
+    # Raise an error if a date is provided for a mode that does not accept it
+    else:
+        if date is not None:
+            raise DateProvided()
 
 def assert_user_has_not_played_the_daily_game(db: Session, user_id: uuid.UUID):
     """

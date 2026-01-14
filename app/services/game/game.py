@@ -1,4 +1,6 @@
 # standard library
+import re
+
 import random
 
 import uuid
@@ -33,9 +35,9 @@ from app.services.game.game_domain import (
 from app.services.game.game_provider import get_daily_game
 
 from app.services.game.game_validator import (
-    assert_date_is_not_in_the_future,
+    assert_date_is_not_today_or_in_the_future,
     assert_game_session_is_unique,
-    assert_date_is_not_given_for_non_archive_modes,
+    assert_date_is_valid_for_mode,
     assert_number_of_attempts_do_not_exceed_the_mode_maximum,
     assert_user_has_not_played_the_daily_game,
 )
@@ -89,7 +91,7 @@ class FreePlayAudioGameMode(GameMode):
         self, payload: StartGameRequest, db: Session, user_id: Optional[uuid.UUID]
     ) -> StartGameDTO:
         # Disallow date input for non-archive modes
-        assert_date_is_not_given_for_non_archive_modes(payload.date)
+        assert_date_is_valid_for_mode(payload.date, self.mode)
 
         # Retrieve a random song from the database
         song = get_random_song(db)
@@ -127,7 +129,7 @@ class DailyGameMode(GameMode):
         self, payload: StartGameRequest, db: Session, user_id: Optional[uuid.UUID]
     ) -> StartGameDTO:
         # Disallow date input for non-archive modes
-        assert_date_is_not_given_for_non_archive_modes(payload.date)
+        assert_date_is_valid_for_mode(payload.date, GameModeEnum.DAILY)
 
         # Daily games are always resolved against today's date
         today = DateType.today()
@@ -170,28 +172,31 @@ class LyricsGameMode(GameMode):
         self, payload: StartGameRequest, db: Session, user_id: Optional[uuid.UUID]
     ) -> StartGameDTO:
         # Disallow date input for non-archive modes
-
-        assert_date_is_not_given_for_non_archive_modes(payload.date)
+        assert_date_is_valid_for_mode(payload.date, GameModeEnum.LYRICS)
 
         song = get_random_song(db)
 
+        # Split semicolon-delimited raw lyrics
         lines = self._split_lyrics(song.lyrics)
 
+        # Determine the starting line at random
         lyrics_start_at = self._get_lyrics_start_at(lines)
 
+        # Derive the lines displayed to the user
         displayed_lines = lines[lyrics_start_at : lyrics_start_at + self.LINES_TO_SHOW]
 
         # Pick the answer
-        lyrics_answer = self._get_lyrics_answer(displayed_lines)
+        lyrics_answer, answer_positions = self._get_lyrics_answer(displayed_lines)
 
         # Mask the lyrics
-        lyrics_given = self._get_lyrics_given(displayed_lines, lyrics_answer)
+        lyrics_given = self._get_lyrics_given(displayed_lines, lyrics_answer, answer_positions)
 
-        # Resolve daily-mode gameplay constraints
+        # Resolve lyrics-mode gameplay constraints
         maximum_attempts = get_maximum_attempts_by_game_mode(GameModeEnum.LYRICS)
 
         expires_in_minutes = get_expires_in_minutes_by_game_mode(GameModeEnum.LYRICS)
 
+        # Build the start-game response for the lyrics mode
         return StartGameDTO(
             song=song,
             lyrics_answer=lyrics_answer,
@@ -212,11 +217,15 @@ class LyricsGameMode(GameMode):
         # Randomly choose a starting line index within bounds
         return random.randint(0, max_start_at)
 
-    def _get_lyrics_answer(self, lines: list[str]) -> str:
+    def _get_lyrics_answer(self, lines: list[str]) -> tuple[str, list[tuple[int, int]]]:
         """
         Pick 1-2 contiguous words from the displayed lines.
 
         Contiguity may cross line boundaries.
+
+        Returns:
+            - answer text
+            - list of (line_index, word_index) positions in flattened order
         """
 
         # Flatten all words across all lines while preserving their positions
@@ -225,7 +234,10 @@ class LyricsGameMode(GameMode):
 
         # Iterate through each line and split it into words
         for line_index, line in enumerate(lines):
-            for word_index, word in enumerate(line.split()):
+            # Remove all non-letter characters from the line
+            stripped_line = re.sub(r"[^a-zA-Z' ]", "", line)
+
+            for word_index, word in enumerate(stripped_line.split()):
                 words.append((line_index, word_index, word))
 
         # Guard against empty input
@@ -248,10 +260,14 @@ class LyricsGameMode(GameMode):
         # Select the contiguous word slice (may span multiple lines)
         selected = words[start : start + answer_length]
 
-        # Join and return only the word values as the final answer string
-        return " ".join(word for _, _, word in selected)
+        answer_text = " ".join(word for _, _, word in selected)
 
-    def _get_lyrics_given(self, lines: list[str], lyrics_answer: str) -> str:
+        # Also return their corresponding positions
+        answer_positions = [(line_index, word_index) for line_index, word_index, _ in selected]
+
+        return answer_text, answer_positions
+
+    def _get_lyrics_given(self, lines: list[str], lyrics_answer: str, answer_positions: list[tuple[int, int]]) -> str:
         """
         Mask the answer words in the displayed lines.
 
@@ -261,58 +277,55 @@ class LyricsGameMode(GameMode):
         # Split the answer string into individual words
         answer_words = lyrics_answer.split()
 
-        # Determine how many contiguous words must be matched and masked
+        # Determine the number of words to mask
         answer_length = len(answer_words)
 
-        # Split each lyric line into a mutable word list
-        split_lines = [line.split() for line in lines]
+        # Validate that the provided positions match the number of words in the answer
+        if len(answer_positions) != answer_length:
+            raise ValueError("Answer positions length does not match answer length.")
 
-        # Flatten all word positions across lines into one single list
-        # Each entry stores: (line_index, word_index)
-        positions: list[tuple[int, int]] = []
+        masked_lines = lines.copy()
 
-        for line_index, words in enumerate(split_lines):
-            for word_index in range(len(words)):
-                positions.append((line_index, word_index))
+        # Map from line index to a list of tuples containing (word index in line, position index in answer_positions)
+        line_to_positions: dict[int, list[tuple[int, int]]] = {}
 
-        # Placeholder for the positions where the answer is found
-        answer_positions = None
+        for index, (line_index, word_index) in enumerate(answer_positions):
+            # Append the word position and its order in the answer
+            line_to_positions.setdefault(line_index, []).append((word_index, index))
 
-        # Slide a window across the flattened word positions
-        for i in range(len(positions) - answer_length + 1):
-            candidate: list[str] = []
+        # Process each line independently
+        for line_index, positions in line_to_positions.items():
+            line = masked_lines[line_index]
 
-            # Collect contiguous words corresponding to the current window
-            for j in range(answer_length):
-                line_index, word_index = positions[i + j]
+            # Identify all word spans (letters and apostrophes) in the current line
+            word_spans = [
+                (m.start(), m.end(), m.group())
+                for m in re.finditer(r"[A-Za-z'-]+", line)
+            ]
 
-                candidate.append(split_lines[line_index][word_index])
+            # Mask words starting from the end of the line to prevent shifting indices
+            for word_index, answer_index in sorted(positions, key=lambda x: x[0], reverse=True):
+                if word_index >= len(word_spans):
+                    raise IndexError("Word index out of bounds.")
 
-            # Check if the candidate sequence exactly matches the answer
-            if candidate == answer_words:
-                answer_positions = positions[i : i + answer_length]
-                break
+                start, end, word = word_spans[word_index]
 
-        # Guard against answers not in the lines
-        if answer_positions is None:
-            raise ValueError("Lyrics answer not found in displayed lines.")
+                # Replace each letter with an underscore and add spacing for readability
+                mask = " ".join("_" for _ in word)
 
-        # Replace each answer word with an underscore mask
-        for idx, (line_index, word_index) in enumerate(answer_positions):
-            word = split_lines[line_index][word_index]
+                # Add extra spacing if the next answer word is on the same line
+                if answer_index < answer_length - 1:
+                    next_line_index, _ = answer_positions[answer_index + 1]
+                    if next_line_index == line_index:
+                        mask += " "
 
-            mask = " ".join("_" for _ in word)
+                # Replace the original word with the generated mask
+                line = line[:start] + mask + line[end:]
 
-            # Add an extra space between words if this is not the last word in the answer
-            if idx < answer_length - 1:
-                mask += "  "
+            # Update the masked line in the final output
+            masked_lines[line_index] = line
 
-            split_lines[line_index][word_index] = mask
-
-        # Reconstruct each line by joining words with single spaces
-        masked_lines = [" ".join(words) for words in split_lines]
-
-        # Join lines back into a semicolon-delimited string a la db
+        # Combine all lines into a single semicolon-delimited string for storage
         return ";".join(masked_lines)
 
 
@@ -320,16 +333,18 @@ class ArchiveGameMode(GameMode):
     def resolve(
         self, payload: StartGameRequest, db: Session, user_id: Optional[uuid.UUID]
     ) -> StartGameDTO:
+        # Allow date input for archive modes
+        assert_date_is_valid_for_mode(payload.date, GameModeEnum.ARCHIVE)
+
         if payload.date is None:
             raise ArchiveDateNotProvided()
 
-        # Determine which date the daily game should be loaded from
-        today = DateType.today()
+        date = payload.date 
 
-        date = payload.date
+        # Disallow non-archive date requests
+        assert_date_is_not_today_or_in_the_future(date)
 
-        assert_date_is_not_in_the_future(date, today)
-
+        # Get the daily game settings for the given date
         daily_game = get_daily_game(db, date)
 
         # Compute a valid audio clip starting position for the archive mode
@@ -382,9 +397,7 @@ def submit_game_service(payload: SubmitGameRequest, db: Session, user_id: uuid.U
     # Decompose payload
     ws_game_session_id = payload.wsGameSessionID
 
-    mode = payload.mode
-
-    date = payload.date
+    mode = GameModeEnum(payload.mode)
 
     won = payload.won
 
@@ -395,9 +408,7 @@ def submit_game_service(payload: SubmitGameRequest, db: Session, user_id: uuid.U
     # Validation
 
     # Validate attempt count
-    assert_number_of_attempts_do_not_exceed_the_mode_maximum(
-        GameModeEnum(mode), attempts
-    )
+    assert_number_of_attempts_do_not_exceed_the_mode_maximum(mode, attempts)
 
     # Get the WebSocket session from in-memory storage
     ws_game_session = sessions.get(ws_game_session_id)
@@ -427,7 +438,7 @@ def submit_game_service(payload: SubmitGameRequest, db: Session, user_id: uuid.U
         mode=mode,
         result=result,
         songID=ws_game_session.answer_song_id,
-        date=date,
+        date=DateType.today() if mode == GameModeEnum.DAILY else None,
     )
 
     db.add(db_game_session)
@@ -441,3 +452,6 @@ def submit_game_service(payload: SubmitGameRequest, db: Session, user_id: uuid.U
         update_statistics(payload, db, user_id)
 
         update_leaderboard(payload, db, user_id)
+
+    # Commit changes
+    db.commit()

@@ -5,7 +5,7 @@ class ArchiveDateNotProvided(Exception):
     pass
 
 
-class DateIsInTheFuture(Exception):
+class DateIsTodayOrInTheFuture(Exception):
     pass
 
 
