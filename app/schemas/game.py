@@ -14,7 +14,7 @@ class StartGameRequest(BaseModel):
 
 class BaseStartGameResponse(BaseModel):
     wsGameSessionID: str
-    wsURL: Annotated[str, AnyWebsocketUrl]
+    wsURL: AnyWebsocketUrl
     expiresInMinutes: Annotated[int, Field(ge=0)]
     date: Optional[DateType]
 
@@ -26,7 +26,7 @@ class AudioStartGameResponse(BaseStartGameResponse):
         GameMode.RAPID,
         GameMode.ARCHIVE,
     ]
-    audio: Annotated[str, HttpUrl]
+    audio: HttpUrl
     audioStartAt: Annotated[int, Field(ge=0)]
 
 
