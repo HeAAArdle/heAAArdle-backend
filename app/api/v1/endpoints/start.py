@@ -20,6 +20,8 @@ from app.schemas.game import (
     StartGameResponse,
 )
 
+from pydantic import AnyWebsocketUrl, HttpUrl
+
 from app.schemas.enums import GameMode
 
 # websocket
@@ -107,7 +109,7 @@ def start_game(
 
     scheme = "wss" if settings.env == "production" else "ws"
 
-    ws_url = f"{scheme}://{settings.host}/{settings.websocket_endpoint_prefix}/{ws_game_session_id}"
+    ws_url = AnyWebsocketUrl(f"{scheme}://{settings.host}/{settings.websocket_endpoint_prefix}/{ws_game_session_id}")
 
     expires_in_minutes = result.expires_in_minutes
 
@@ -136,7 +138,7 @@ def start_game(
             )
 
         # Generate a signed URL for more secure audio playback
-        audio = get_signed_audio_link(mode, result.song.audioLink)
+        audio = HttpUrl(get_signed_audio_link(mode, result.song.audioLink))
 
         date = result.date
 
