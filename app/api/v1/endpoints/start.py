@@ -104,7 +104,10 @@ def start_game(
     )
 
     # Construct the WebSocket connection URL for the client
-    ws_url = f"wss://{settings.host}/{settings.websocket_endpoint_prefix}/{ws_game_session_id}"
+
+    scheme = "wss" if settings.env == "production" else "ws"
+
+    ws_url = f"{scheme}://{settings.host}/{settings.websocket_endpoint_prefix}/{ws_game_session_id}"
 
     expires_in_minutes = result.expires_in_minutes
 
