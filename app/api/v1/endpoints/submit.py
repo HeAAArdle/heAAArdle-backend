@@ -15,6 +15,7 @@ from app.schemas.game import SubmitGameRequest
 # services
 from app.services.game.game import submit_game_service
 
+# exceptions
 from app.services.exceptions import (
     InvalidNumberOfAttempts,
     SessionNotFound,
@@ -50,7 +51,7 @@ def submit_game(
         raise HTTPException(409, "Result already submitted for this session.")
 
     except UserAlreadyPlayedTheDailyGame:
-        raise HTTPException(403, "User has already played today's daily game.")
+        raise HTTPException(403, "User has already played today's Heardle.")
 
     # No response body needed for successful submission
     return None

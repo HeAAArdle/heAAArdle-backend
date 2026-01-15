@@ -326,7 +326,7 @@ class LyricsGameMode(GameMode):
             masked_lines[line_index] = line
 
         # Combine all lines into a single semicolon-delimited string for storage
-        return ";".join(masked_lines)
+        return "; ".join(masked_lines)
 
 
 class ArchiveGameMode(GameMode):
@@ -431,27 +431,32 @@ def submit_game_service(payload: SubmitGameRequest, db: Session, user_id: uuid.U
     # Determine game result
     result = Result.win if won else Result.lose
 
+    date = DateType.today() if mode == GameModeEnum.DAILY else None
+
     # Persist the game session in the database
-    db_game_session = GameSession(
-        wsGameSessionID=ws_game_session_id,
-        userID=user_id,
-        mode=mode,
-        result=result,
-        songID=ws_game_session.answer_song_id,
-        date=DateType.today() if mode == GameModeEnum.DAILY else None,
-    )
+    try:
+        db_game_session = GameSession(
+            wsGameSessionID=ws_game_session_id,
+            userID=user_id,
+            mode=mode,
+            result=result,
+            songID=ws_game_session.answer_song_id,
+            date=date,
+        )
 
-    db.add(db_game_session)
+        db.add(db_game_session)
 
-    ##
+        ##
 
-    # Side-effects
+        # Side-effects
 
-    # Update stats and leaderboard if the user is logged in
-    if user_id:
-        update_statistics(payload, db, user_id)
+        # Update stats and leaderboard if the user is logged in
+        if user_id:
+            update_statistics(payload, db, user_id)
 
-        update_leaderboard(payload, db, user_id)
+            update_leaderboard(payload, db, user_id)
 
-    # Commit changes
-    db.commit()
+        # Commit changes
+        db.commit()
+    except:
+        db.rollback()
