@@ -61,7 +61,7 @@ def create_ws_game_session(
     return game_session_id
 
 
-def check_guess(game_session_id: str, guess: str) -> dict[str, str | bool]:
+def check_guess(game_session_id: str, guess: str) -> dict[str, str | bool | int]:
     """
     Validate a user's guess against the active WebSocket game session.
 
@@ -75,7 +75,7 @@ def check_guess(game_session_id: str, guess: str) -> dict[str, str | bool]:
 
     # Immediately return if the session has already ended
     if session.done == True:
-        return {"type": "result", "is_correct": False, "done": True, "guess": guess}
+        return {"type": "result", "is_correct": False, "done": True, "guess": guess, "attempts": session.attempts}
 
     # Increment the number of attempts for this session
     session.attempts += 1
@@ -94,4 +94,4 @@ def check_guess(game_session_id: str, guess: str) -> dict[str, str | bool]:
         done = False
 
     # Return the result of the guess
-    return {"type": "result", "is_correct": is_correct, "done": done, "guess": guess}
+    return {"type": "result", "is_correct": is_correct, "done": done, "guess": guess, "attempts": session.attempts}

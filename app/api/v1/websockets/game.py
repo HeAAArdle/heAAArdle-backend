@@ -74,6 +74,7 @@ async def game_ws(websocket: WebSocket, game_session_id: str):
             #   "is_correct": bool,
             #   "done":       bool,
             #   "guess":      str,
+            #   "attempts":   int,
             # }
             response = check_guess(game_session_id, guess)
 
