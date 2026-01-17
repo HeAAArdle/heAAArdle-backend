@@ -1,3 +1,8 @@
+# standard library
+import uuid
+
+from dataclasses import dataclass
+
 # SQLAlchemy
 from sqlalchemy.orm import Session
 
@@ -12,11 +17,13 @@ from app.models import *
 # schemas
 from app.schemas.enums import GameMode
 
+from pydantic import HttpUrl
+
 # services
 from app.services.game.game_domain import get_expires_in_minutes_by_game_mode
 
 # exceptions
-from app.services.exceptions import NoSongAvailable
+from app.services.exceptions import NoSongAvailable, SongNotFound
 
 # utils
 from app.utils.helpers import calculate_minutes_to_seconds
@@ -60,6 +67,53 @@ def get_random_song(db: Session) -> Song:
 
     return song
 
+
+@dataclass
+class SongMetadata:
+    title: str
+
+    releaseYear: int
+
+    album: str
+
+    shareLink: HttpUrl
+
+
+def get_song_metadata_by_songID(db: Session, song_id: uuid.UUID) -> SongMetadata:
+    """
+    Retrieve the title, release year, album, and share link of a song linked to a given ID.
+
+    Returns:
+        Song metadata.
+
+    Raises:
+        SongNotFound: If the given song is not in the database.
+    """
+    
+    query = select(Song).where(Song.songID == song_id)
+
+    song = db.scalars(query).first()
+
+    if not song:
+        raise SongNotFound()
+
+    # Resolve song metadata
+
+    title = song.title
+
+    releaseYear = song.releaseYear
+
+    album = song.album if song.album else "Standalone Single"
+
+    shareLink = HttpUrl(song.shareLink)
+
+    return SongMetadata(
+        title=title,
+        releaseYear=releaseYear,
+        album=album,
+        shareLink=shareLink,
+    )
+    
 
 def get_signed_audio_link(mode: GameMode, audio_link: str) -> str:
     """

@@ -17,6 +17,10 @@ class NoSongAvailable(Exception):
     pass
 
 
+class SongNotFound(Exception):
+    pass
+
+
 class DailyGameNotFound(Exception):
     pass
 

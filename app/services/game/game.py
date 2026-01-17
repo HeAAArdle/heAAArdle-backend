@@ -18,9 +18,9 @@ from sqlalchemy.orm import Session
 from app.models import *
 
 # schemas
-from app.schemas.game import StartGameRequest, SubmitGameRequest
+from app.schemas.game import StartGameRequest, SubmitGameRequest, SubmitGameResponse
 
-from app.schemas.enums import GameMode as GameModeEnum
+from app.schemas.enums import GameMode as GameModeEnum, SubmittableGameMode as SubmittableGameModeEnum
 
 # websocket
 from app.ws.session import sessions
@@ -42,7 +42,7 @@ from app.services.game.game_validator import (
     assert_user_has_not_played_the_daily_game,
 )
 
-from app.services.song import get_random_song
+from app.services.song import get_random_song, get_song_metadata_by_songID
 
 from app.services.statistics import update_statistics
 
@@ -388,7 +388,7 @@ def start_game_service(
     return handler.resolve(payload, db, user_id)
 
 
-def submit_game_service(payload: SubmitGameRequest, db: Session, user_id: uuid.UUID):
+def submit_game_service(payload: SubmitGameRequest, db: Session, user_id: uuid.UUID) -> SubmitGameResponse:
     """
     Validate and persist a completed game session,
     updating user statistics and leaderboards when applicable.
@@ -421,7 +421,7 @@ def submit_game_service(payload: SubmitGameRequest, db: Session, user_id: uuid.U
     assert_game_session_is_unique(db, ws_game_session_id)
 
     # Enforce daily-play restriction for authenticated users
-    if mode == "daily" and user_id:
+    if mode == GameModeEnum.DAILY and user_id:
         assert_user_has_not_played_the_daily_game(db, user_id)
 
     ##
@@ -433,6 +433,8 @@ def submit_game_service(payload: SubmitGameRequest, db: Session, user_id: uuid.U
 
     date = DateType.today() if mode == GameModeEnum.DAILY else None
 
+    songID = ws_game_session.answer_song_id
+
     # Persist the game session in the database
     try:
         db_game_session = GameSession(
@@ -440,7 +442,7 @@ def submit_game_service(payload: SubmitGameRequest, db: Session, user_id: uuid.U
             userID=user_id,
             mode=mode,
             result=result,
-            songID=ws_game_session.answer_song_id,
+            songID=songID,
             date=date,
         )
 
@@ -458,5 +460,18 @@ def submit_game_service(payload: SubmitGameRequest, db: Session, user_id: uuid.U
 
         # Commit changes
         db.commit()
+
     except:
         db.rollback()
+    
+    song_metadata = get_song_metadata_by_songID(db, songID)
+
+    return SubmitGameResponse(
+        mode=SubmittableGameModeEnum(mode),
+        won=won,
+        attempts=attempts,
+        title=song_metadata.title,
+        releaseYear=song_metadata.releaseYear,
+        album=song_metadata.album,
+        shareLink=song_metadata.shareLink
+    )

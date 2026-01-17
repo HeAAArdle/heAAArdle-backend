@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from app.db.get_db import get_db
 
 # schemas
-from app.schemas.game import SubmitGameRequest
+from app.schemas.game import SubmitGameRequest, SubmitGameResponse
 
 # services
 from app.services.game.game import submit_game_service
@@ -27,7 +27,7 @@ from app.services.exceptions import (
 router = APIRouter()
 
 
-@router.post("/submit")
+@router.post("/submit", response_model=SubmitGameResponse)
 def submit_game(
     payload: SubmitGameRequest,
     db: Session = Depends(get_db),
@@ -39,7 +39,7 @@ def submit_game(
 
     try:
         # Process the submitted game and persist results
-        submit_game_service(payload, db, user_id)
+        result = submit_game_service(payload, db, user_id)
 
     except InvalidNumberOfAttempts:
         raise HTTPException(400, "Invalid number of attempts for the game mode.")
@@ -53,5 +53,5 @@ def submit_game(
     except UserAlreadyPlayedTheDailyGame:
         raise HTTPException(403, "User has already played today's Heardle.")
 
-    # No response body needed for successful submission
-    return None
+    # Return game result and song metadata
+    return result

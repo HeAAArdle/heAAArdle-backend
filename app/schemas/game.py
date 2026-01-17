@@ -47,6 +47,18 @@ class SubmitGameRequest(BaseModel):
     attempts: Annotated[int, Field(ge=1, le=6)]
 
 
+class SubmitGameResponse(BaseModel):
+    mode: SubmittableGameMode
+    won: bool
+    attempts: Annotated[int, Field(ge=1, le=6)]
+    title: str
+    releaseYear: Annotated[int, Field(ge=1)]
+    album: str
+    shareLink: HttpUrl
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class UnavailableDay(BaseModel):
     date: DateType
     available: Literal[False]
