@@ -20,6 +20,7 @@ from app.services.exceptions import (
     InvalidNumberOfAttempts,
     SessionNotFound,
     DuplicateSession,
+    SongNotFound,
     UserAlreadyPlayedTheDailyGame,
 )
 
@@ -52,6 +53,9 @@ def submit_game(
 
     except UserAlreadyPlayedTheDailyGame:
         raise HTTPException(403, "User has already played today's Heardle.")
+
+    except SongNotFound:
+        raise HTTPException(404, "Song not found in the database.")
 
     # Return game result and song metadata
     return result

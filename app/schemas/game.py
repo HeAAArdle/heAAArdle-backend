@@ -55,6 +55,7 @@ class SubmitGameResponse(BaseModel):
     releaseYear: Annotated[int, Field(ge=1)]
     album: str
     shareLink: HttpUrl
+    artists: List[str]
 
     model_config = ConfigDict(from_attributes=True)
 

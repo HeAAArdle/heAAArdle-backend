@@ -473,5 +473,6 @@ def submit_game_service(payload: SubmitGameRequest, db: Session, user_id: uuid.U
         title=song_metadata.title,
         releaseYear=song_metadata.releaseYear,
         album=song_metadata.album,
-        shareLink=song_metadata.shareLink
+        shareLink=song_metadata.shareLink,
+        artists=song_metadata.artists
     )
