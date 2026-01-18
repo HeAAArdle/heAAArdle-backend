@@ -1,32 +1,28 @@
+from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
+from scipy import stats
+from app.models.user import User
 from sqlalchemy.orm import Session
 
-from app.schemas.account import (GetUserStatisticsRequest, GetUserStatisticsResponse)
-from app.services.statistics_service import get_db_statistics
-from app.services.statistics_mapper import dbstats_to_schemastats
+from app.schemas.account import GetUserStatisticsResponse
+from app.services.statistics.statistics_get import get_db_statistics
+from app.services.statistics.statistics_map import stat_mapper
+from app.services.authentication.authentication_dependencies import get_current_user
 from app.db.session import get_db
-from app.services.auth_service import get_current_user
 
 router = APIRouter()
 
 @router.post("/", response_model=GetUserStatisticsResponse)
-def get_user_statistics_endpoint(req: GetUserStatisticsRequest, db: Session = Depends(get_db)):
-    user = get_current_user(req.token, db)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+def get_user_statistics(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """
+    Verifies the user and retrieves their statistics.
+    """
+    stats = get_db_statistics(db, user.userID)
 
-    return get_user_statistics(db, user.id)
+    original = stats.get("original")
+    daily = stats.get("daily")
 
-def get_user_statistics(db: Session, user_id: str) -> GetUserStatisticsResponse:
-    stats = get_db_statistics(db, user_id)
+    if not original or not daily:
+        raise HTTPException(status_code=500, detail="Statistics missing")
 
-    try:
-        original = stats["original"]
-        daily = stats["daily"]
-    except KeyError:
-        raise ValueError("Statistics missing")
-
-    return GetUserStatisticsResponse(
-        original=dbstats_to_schemastats(original),
-        daily=dbstats_to_schemastats(daily),
-    )
+    return GetUserStatisticsResponse(original=stat_mapper(original), daily=stat_mapper(daily))

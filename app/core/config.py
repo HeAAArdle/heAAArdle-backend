@@ -10,6 +10,16 @@ class Settings(BaseSettings):
 
     direct_url: Optional[str] = None
 
-    model_config = SettingsConfigDict(env_file=".env.example")
+    supabase_url: Optional[str] = None
+
+    supabase_key: Optional[str] = None
+
+    host: Optional[str] = None
+
+    websocket_endpoint_prefix: Optional[str] = None
+
+    frontend_url: Optional[str] = None
+
+    model_config = SettingsConfigDict(env_file=".env")
 
 settings = Settings()

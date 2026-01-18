@@ -1,7 +1,10 @@
 from app.models.statistics import Statistics as StatisticsModel
 from app.schemas.account import Statistics as StatisticsSchema
 
-def dbstats_to_schemastats(stats: StatisticsModel) -> StatisticsSchema:
+def stat_mapper(stats: StatisticsModel) -> StatisticsSchema:
+    """
+    Maps a Statistics database model instance to a Statistics schema instance.
+    """
     gamesPlayed = stats.gamesPlayed
     win_percentage = (stats.winCount * 100 // gamesPlayed) if gamesPlayed > 0 else 0
 

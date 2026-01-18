@@ -19,15 +19,15 @@ class UserWins(BaseModel):
     wins: int
 
 class GetLeaderboardDataOriginal(BaseModel):
-    daily: UserWins
-    weekly: UserWins
-    monthly: UserWins
-    allTime: UserWins
+    daily: List[UserWins]
+    weekly: List[UserWins]
+    monthly: List[UserWins]
+    allTime: List[UserWins]
 
 class GetLeaderboardDataDaily(BaseModel):
-    weekly: UserWins
-    monthly: UserWins
-    allTime: UserWins
+    weekly: List[UserWins]
+    monthly: List[UserWins]
+    allTime: List[UserWins]
 
 class GetLeaderboardDataResponse(BaseModel):
     original: GetLeaderboardDataOriginal

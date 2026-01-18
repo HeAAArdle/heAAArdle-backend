@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1.endpoints import health, statistics, user
+from app.api.v1.endpoints import health, statistics, user, leaderboards
 
 api_router = APIRouter()
 
@@ -7,3 +7,4 @@ api_router = APIRouter()
 api_router.include_router(health.router, prefix="/health")
 api_router.include_router(statistics.router, prefix="/statistics")
 api_router.include_router(user.router, prefix="/user")
+api_router.include_router(leaderboards.router, prefix="/leaderboards")
