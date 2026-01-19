@@ -22,10 +22,10 @@ class SongArtist(Base):
 
     # Relationships
 
-    song: Mapped["Song"] = relationship( # type: ignore
+    song: Mapped["Song"] = relationship(
         back_populates="song_artists"
     )
 
-    artist: Mapped["Artist"] = relationship( # type: ignore
+    artist: Mapped["Artist"] = relationship(
         back_populates="song_artists"
     )

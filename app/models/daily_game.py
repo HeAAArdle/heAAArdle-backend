@@ -1,4 +1,4 @@
-from sqlalchemy import Date, ForeignKey
+from sqlalchemy import Date, Integer, ForeignKey
 
 from sqlalchemy.dialects.postgresql import UUID
 
@@ -6,14 +6,19 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 import uuid
 
+from datetime import date as DateType
+
 from app.db.base import Base
 
 from app.models.song import Song
+from app.models.game_session import GameSession
 
 class DailyGame(Base):
     __tablename__ = "daily_games"
 
-    date: Mapped[Date] = mapped_column(Date, primary_key=True)
+    date: Mapped[DateType] = mapped_column(Date, primary_key=True)
+
+    startAt: Mapped[int] = mapped_column(Integer, nullable=False)
 
     # Foreign Keys
 
@@ -24,12 +29,12 @@ class DailyGame(Base):
     # Relationships
 
     # DailyGame <-> Song: Many-to-One
-    song: Mapped["Song"] = relationship( # type: ignore
+    song: Mapped["Song"] = relationship(
         "Song", back_populates="daily_games"
     )
 
     # DailyGame <-> GameSession: One-to-Many
-    game_sessions: Mapped[list["GameSession"]] = relationship( # type: ignore
+    game_sessions: Mapped[list["GameSession"]] = relationship(
         "GameSession", back_populates="daily_game"
     )
 

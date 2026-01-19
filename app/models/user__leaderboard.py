@@ -25,11 +25,11 @@ class UserLeaderboard(Base):
 
     # Relationships
 
-    user: Mapped["User"] = relationship( # type: ignore
+    user: Mapped["User"] = relationship(
         back_populates="user_leaderboards"
     )
 
-    leaderboard: Mapped["Leaderboard"] = relationship( # type: ignore
+    leaderboard: Mapped["Leaderboard"] = relationship(
         back_populates="user_leaderboards"
     )
 

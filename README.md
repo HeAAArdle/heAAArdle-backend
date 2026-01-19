@@ -23,7 +23,8 @@ backend/
 │   ├── api/
 │   │   └── v1/               # API version 1
 │   │       ├── api.py        # Central router
-│   │       └── endpoints/    # Route handlers
+│   │       ├── endpoints/    # Route handlers
+│   │       └── websockets/   # Game websocket handler
 │   ├── core/                 # Global configuration and shared utilities
 │   │   └── config.py
 │   ├── models/               # Database models
@@ -32,6 +33,7 @@ backend/
 │   ├── db/                   # Data
 │   ├── utils/                # Utility functions used across the app
 │   │   └── helpers/          # Helper modules
+│   ├── ws/                   # Websocket connection manager and session definition
 ├── .env                      # Local environment variables
 ├── .env.example              # Example env file
 ├── requirements.txt          # Python package dependencies

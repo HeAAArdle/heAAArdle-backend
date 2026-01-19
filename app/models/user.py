@@ -24,16 +24,16 @@ class User(Base):
     # Relationships
 
     # User <-> GameSession: One-to-Many
-    game_sessions: Mapped["GameSession"] = relationship( # type: ignore
+    game_sessions: Mapped["GameSession"] = relationship(
         "GameSession", back_populates="user", uselist=False
     )
 
-    # User <-> Statistics: One-to-One
-    statistics: Mapped["Statistics"] = relationship( # type: ignore
+    # User <-> Statistics: One-to-Many
+    statistics: Mapped["Statistics"] = relationship(
         "Statistics", back_populates="user"
     )
 
     # User <-> Leaderboard: Many-to-Many
-    user_leaderboards: Mapped[list["UserLeaderboard"]] = relationship( # type: ignore
+    user_leaderboards: Mapped[list["UserLeaderboard"]] = relationship(
         back_populates="user"
     )

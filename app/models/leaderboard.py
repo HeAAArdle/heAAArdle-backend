@@ -13,6 +13,6 @@ class Leaderboard(Base):
     # Relationships
 
     # Leaderboard <-> User: Many-to-Many
-    user_leaderboards: Mapped[list["UserLeaderboard"]] = relationship( # type: ignore
+    user_leaderboards: Mapped[list["UserLeaderboard"]] = relationship(
         back_populates="leaderboard"
     )
