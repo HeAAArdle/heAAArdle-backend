@@ -10,8 +10,11 @@ from datetime import date as DateType
 
 from app.db.base import Base
 
-from app.models.song import Song
-from app.models.game_session import GameSession
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.song import Song
+    from app.models.game_session import GameSession
 
 class DailyGame(Base):
     __tablename__ = "daily_games"

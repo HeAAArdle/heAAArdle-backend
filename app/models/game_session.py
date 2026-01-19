@@ -10,7 +10,12 @@ from datetime import date as DateType
 
 from app.db.base import Base
 
-from app.models.daily_game import DailyGame
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.user import User
+    from app.models.daily_game import DailyGame
+    
 from app.models.enums import modes, results
 
 class GameSession(Base):

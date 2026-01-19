@@ -44,9 +44,9 @@ from app.services.game.game_validator import (
 
 from app.services.song import get_random_song, get_song_metadata_by_songID
 
-from app.services.statistics import update_statistics
+from app.services.statistics.statistics_update import update_statistics_after_game
 
-from app.services.leaderboard import update_leaderboard
+from app.services.leaderboards.leaderboards_update import update_leaderboards_after_game
 
 # exceptions
 from app.services.exceptions import (
@@ -454,9 +454,9 @@ def submit_game_service(payload: SubmitGameRequest, db: Session, user_id: uuid.U
 
         # Update stats and leaderboard if the user is logged in
         if user_id:
-            update_statistics(payload, db, user_id)
+            update_statistics_after_game(db, user_id, payload.mode, payload.won, payload.attempts)
 
-            update_leaderboard(payload, db, user_id)
+            update_leaderboards_after_game(db, user_id, payload.mode)
 
         # Commit changes
         db.commit()

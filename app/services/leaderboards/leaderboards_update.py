@@ -1,9 +1,9 @@
-from sqlalchemy import UUID
+import uuid
 from sqlalchemy.orm import Session
 
 from app.models.user__leaderboard import UserLeaderboard
 
-def update_leaderboards_after_game(db: Session, user_id: UUID, mode: str):
+def update_leaderboards_after_game(db: Session, user_id: uuid.UUID, mode: str):
     """
     Updates the leaderboards for a user after a game has been won.
     """
@@ -16,7 +16,7 @@ def update_leaderboards_after_game(db: Session, user_id: UUID, mode: str):
         increment_leaderboard(db, user_id, mode, period)
 
 
-def increment_leaderboard(db: Session, user_id: UUID, mode: str, period: str):    
+def increment_leaderboard(db: Session, user_id: uuid.UUID, mode: str, period: str):    
     """
     Increments the number of wins for a user in the leaderboard of a specific mode.
     """

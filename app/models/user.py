@@ -8,8 +8,12 @@ import uuid
 
 from app.db.base import Base
 
-from app.models.game_session import GameSession
-from app.models.user__leaderboard import UserLeaderboard
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.game_session import GameSession
+    from app.models.user__leaderboard import UserLeaderboard
+    from app.models.statistics import Statistics
 
 class User(Base):
     __tablename__ = "users"

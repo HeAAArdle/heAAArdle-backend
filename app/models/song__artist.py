@@ -8,7 +8,11 @@ import uuid
 
 from app.db.base import Base
 
-from app.models.artist import Artist
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.artist import Artist
+    from app.models.song import Song
 
 class SongArtist(Base):
     __tablename__ = "song__artist"

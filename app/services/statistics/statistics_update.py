@@ -1,8 +1,9 @@
+import uuid
 from sqlalchemy.orm import Session
 
 from app.models.statistics import Statistics
 
-def update_statistics_after_game(db: Session, user_id: str, mode: str, did_win: bool, guesses: int) -> None:
+def update_statistics_after_game(db: Session, user_id: uuid.UUID, mode: str, did_win: bool, guesses: int) -> None:
     """
     Updates the statistics for a user after a game has been submitted.
     """
