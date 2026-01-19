@@ -1,6 +1,5 @@
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
-from scipy import stats
 from app.models.user import User
 from sqlalchemy.orm import Session
 

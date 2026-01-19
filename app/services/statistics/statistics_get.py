@@ -8,15 +8,10 @@ def get_db_statistics(db: Session, user_id: UUID) -> dict[str, Statistics]:
     """
     Retrieves statistics, separated by mode, for a given user from the database.
     """
-    query = select(Statistics)
+    query = select(Statistics).where(Statistics.userID == user_id)
     statistics = db.scalars(query).all()
 
-    # for s in statistics:
-    #     print(s, s.userID, s.mode)
+    for s in statistics:
+        print(s, s.userID, s.mode)
 
-
-    grouped = {}
-    for stat in statistics:
-        grouped.setdefault(stat.userID, {})[stat.mode] = stat
-
-    return grouped
+    return {s.mode: s for s in statistics}
