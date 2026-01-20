@@ -32,11 +32,11 @@ router = APIRouter()
 def submit_game(
     payload: SubmitGameRequest,
     db: Session = Depends(get_db),
-    # current_user: User = Depends(get_user),  # Uncomment once auth is available
+    # current_user: User = Depends(get_optional_user),  # Uncomment once auth is available
 ):
     # Placeholder user ID until auth is available: current_user
     user_id = uuid.UUID("00000000-0000-0000-0000-000000000001")
-    # user_id = current_user.userID
+    # user_id = current_user.userID if current_user else None
 
     try:
         # Process the submitted game and persist results
