@@ -37,22 +37,19 @@ from app.services.game.game_provider import get_daily_game
 from app.services.game.game_validator import (
     assert_date_is_not_today_or_in_the_future,
     assert_game_session_is_unique,
-    assert_date_is_valid_for_mode,
+    assert_date_is_valid_for_non_archive_mode,
     assert_number_of_attempts_do_not_exceed_the_mode_maximum,
     assert_user_has_not_played_the_daily_game,
 )
 
 from app.services.song import get_random_song, get_song_metadata_by_songID
 
-from app.services.statistics.statistics_update import update_statistics_after_game
+from app.services.statistics import update_statistics
 
-from app.services.leaderboards.leaderboards_update import update_leaderboards_after_game
+from app.services.leaderboard import update_leaderboard
 
 # exceptions
-from app.services.exceptions import (
-    ArchiveDateNotProvided,
-    SessionNotFound,
-)
+from app.services.exceptions import ArchiveDateNotProvided, SessionNotFound
 
 # utils
 from app.api.v1.endpoints.enums import Result
@@ -91,7 +88,7 @@ class FreePlayAudioGameMode(GameMode):
         self, payload: StartGameRequest, db: Session, user_id: Optional[uuid.UUID]
     ) -> StartGameDTO:
         # Disallow date input for non-archive modes
-        assert_date_is_valid_for_mode(payload.date, self.mode)
+        assert_date_is_valid_for_non_archive_mode(payload.date)
 
         # Retrieve a random song from the database
         song = get_random_song(db)
@@ -129,7 +126,7 @@ class DailyGameMode(GameMode):
         self, payload: StartGameRequest, db: Session, user_id: Optional[uuid.UUID]
     ) -> StartGameDTO:
         # Disallow date input for non-archive modes
-        assert_date_is_valid_for_mode(payload.date, GameModeEnum.DAILY)
+        assert_date_is_valid_for_non_archive_mode(payload.date)
 
         # Daily games are always resolved against today's date
         today = DateType.today()
@@ -172,7 +169,7 @@ class LyricsGameMode(GameMode):
         self, payload: StartGameRequest, db: Session, user_id: Optional[uuid.UUID]
     ) -> StartGameDTO:
         # Disallow date input for non-archive modes
-        assert_date_is_valid_for_mode(payload.date, GameModeEnum.LYRICS)
+        assert_date_is_valid_for_non_archive_mode(payload.date)
 
         song = get_random_song(db)
 
@@ -333,13 +330,11 @@ class ArchiveGameMode(GameMode):
     def resolve(
         self, payload: StartGameRequest, db: Session, user_id: Optional[uuid.UUID]
     ) -> StartGameDTO:
-        # Allow date input for archive modes
-        assert_date_is_valid_for_mode(payload.date, GameModeEnum.ARCHIVE)
-
+        # Disallow empty date input for archive mode
         if payload.date is None:
             raise ArchiveDateNotProvided()
 
-        date = payload.date 
+        date = payload.date
 
         # Disallow non-archive date requests
         assert_date_is_not_today_or_in_the_future(date)
@@ -379,8 +374,7 @@ def start_game_service(
     payload: StartGameRequest, db: Session, user_id: Optional[uuid.UUID]
 ) -> StartGameDTO:
     """
-    Resolve a start-game request into the song, timing, and rule constraints
-    for the selected game mode.
+    Resolve a start-game request into the song, timing, and rule constraints for the selected game mode.
     """
 
     handler = MODE_HANDLERS[payload.mode]
@@ -388,10 +382,12 @@ def start_game_service(
     return handler.resolve(payload, db, user_id)
 
 
-def submit_game_service(payload: SubmitGameRequest, db: Session, user_id: uuid.UUID) -> SubmitGameResponse:
+def submit_game_service(
+    payload: SubmitGameRequest, db: Session, user_id: Optional[uuid.UUID]
+) -> SubmitGameResponse:
     """
-    Validate and persist a completed game session,
-    updating user statistics and leaderboards when applicable.
+    Validate a completed game session and return the result.
+    Persist the session and update user-related data only if the user is authenticated.
     """
 
     # Decompose payload
@@ -417,55 +413,65 @@ def submit_game_service(payload: SubmitGameRequest, db: Session, user_id: uuid.U
     if not ws_game_session:
         raise SessionNotFound()
 
-    # Prevent duplicate submissions
-    assert_game_session_is_unique(db, ws_game_session_id)
+    if user_id:
+        # Prevent duplicate submissions
+        assert_game_session_is_unique(db, ws_game_session_id)
 
-    # Enforce daily-play restriction for authenticated users
-    if mode == GameModeEnum.DAILY and user_id:
-        assert_user_has_not_played_the_daily_game(db, user_id)
+        # Enforce one daily play per user for daily mode
+        if mode == GameModeEnum.DAILY:
+            assert_user_has_not_played_the_daily_game(db, user_id)
 
     ##
 
-    # Persistence
+    # Result computation
 
-    # Determine game result
+    # Determine the game outcome
     result = Result.win if won else Result.lose
 
+    # Assign date only for daily games
     date = DateType.today() if mode == GameModeEnum.DAILY else None
 
+    # Resolve the answer song from the WebSocket session
     songID = ws_game_session.answer_song_id
 
-    # Persist the game session in the database
-    try:
-        db_game_session = GameSession(
-            wsGameSessionID=ws_game_session_id,
-            userID=user_id,
-            mode=mode,
-            result=result,
-            songID=songID,
-            date=date,
-        )
+    ##
 
-        db.add(db_game_session)
+    # Persistence (authenticated users only)
 
-        ##
+    if user_id:
+        try:
+            # Persist the completed game session
+            db_game_session = GameSession(
+                wsGameSessionID=ws_game_session_id,
+                userID=user_id,
+                mode=mode,
+                result=result,
+                songID=songID,
+                date=date,
+            )
 
-        # Side-effects
+            db.add(db_game_session)
 
-        # Update stats and leaderboard if the user is logged in
-        if user_id:
-            update_statistics_after_game(db, user_id, payload.mode, payload.won, payload.attempts)
+            ##
 
-            update_leaderboards_after_game(db, user_id, payload.mode)
+            # Side Effects
 
-        # Commit changes
-        db.commit()
+            # Update user statistics and leaderboard standings
+            update_statistics(payload, db, user_id)
 
-    except:
-        db.rollback()
+            update_leaderboard(payload, db, user_id)
+
+            # Commit all database changes
+            db.commit()
+
+        except:
+            # Roll back all changes if any persistence step fails
+            db.rollback()
     
+    # Fetch song metadata
     song_metadata = get_song_metadata_by_songID(db, songID)
 
+    # Return the game result and song details
     return SubmitGameResponse(
         mode=SubmittableGameModeEnum(mode),
         won=won,
