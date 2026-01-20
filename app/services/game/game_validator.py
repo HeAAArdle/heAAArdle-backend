@@ -16,7 +16,6 @@ from app.schemas.enums import GameMode
 
 # exceptions
 from app.services.exceptions import (
-    ArchiveDateNotProvided,
     DateProvided,
     DateIsTodayOrInTheFuture,
     DuplicateSession,
@@ -44,24 +43,18 @@ def assert_date_is_not_today_or_in_the_future(date: DateType):
         raise DateIsTodayOrInTheFuture()
 
 
-def assert_date_is_valid_for_mode(date: DateType | None, mode: GameMode):
+def assert_date_is_valid_for_non_archive_mode(date: DateType | None):
     """
-    Ensure date rules are respected for each game mode.
+    Ensure that no date is provided for non-archive game modes.
 
     Raises:
-        ArchiveDateNotProvided: If no date is given for an archive mode game.
-    
-        DateProvided: If a date is given for a non-daily or non-archive mode.
+        DateProvided: If a date is supplied for a game mode that does not accept dates.
     """
 
-    if mode == GameMode.ARCHIVE:
-        if date is None:
-            raise ArchiveDateNotProvided()
+    # Disallow explicit date input for non-archive modes
+    if date is not None:
+        raise DateProvided()
 
-    # Raise an error if a date is provided for a mode that does not accept it
-    else:
-        if date is not None:
-            raise DateProvided()
 
 def assert_user_has_not_played_the_daily_game(db: Session, user_id: uuid.UUID):
     """
