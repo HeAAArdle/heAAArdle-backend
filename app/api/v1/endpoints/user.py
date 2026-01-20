@@ -21,11 +21,11 @@ def signup(req: SignUpRequest, db: Session = Depends(get_db)):
     return SignUpResponse(username=user.username, token=token)
 
 @router.post("/signin/", response_model=SignInResponse)
-def signin(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+def signin(req: SignUpRequest, db: Session = Depends(get_db)):
     """
     Signs in a user.
     """
-    user, token = sign_in(db, form_data.username, form_data.password)
+    user, token = sign_in(db, req.username, req.password)
     return SignInResponse(access_token=token, token_type="bearer")
 
 @router.post("/signout/")    
