@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.schemas.account import GetUserStatisticsResponse
 from app.services.statistics.statistics_get import get_db_statistics
 from app.services.statistics.statistics_map import stat_mapper
-from app.services.authentication.authentication_dependencies import get_current_user
+from app.services.user.user_dependencies import get_current_user
 from app.db.session import get_db
 
 router = APIRouter()

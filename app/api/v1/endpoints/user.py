@@ -3,8 +3,12 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
+from app.models.user import User
 from app.schemas.account import (SignUpRequest, SignUpResponse, SignInResponse)
-from app.services.authentication.authentication import sign_up, sign_in, sign_out
+from app.services.user.authentication import sign_up, sign_in, sign_out
+from app.services.user.user_dependencies import get_current_user
+from app.services.user.delete import delete_user
+
 
 router = APIRouter()
 
@@ -30,3 +34,10 @@ def signout(token: str = Depends(OAuth2PasswordBearer(tokenUrl="/api/v1/user/sig
     Signs out a user.
     """
     return sign_out(token)
+
+@router.delete("/delete")
+def delete_account(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """
+    Permanently deletes the authenticated user's account and all related data.
+    """
+    delete_user(db, current_user.userID)

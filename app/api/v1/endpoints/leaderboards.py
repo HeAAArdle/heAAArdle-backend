@@ -18,7 +18,7 @@ def get_leaderboard(db: Session = Depends(get_db)):
     Returns leaderboard winners for all modes and periods.
     """
 
-    "Helper function to map database rows to UserWins schema."
+    # Helper function to map database rows to UserWins schema.
     def map_users(data):
         return [UserWins(**row) for row in data]
 

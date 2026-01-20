@@ -34,7 +34,7 @@ class Statistics(Base):
     # Foreign Keys
 
     userID: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.userID"), primary_key=True
+        UUID(as_uuid=True), ForeignKey("users.userID", ondelete="CASCADE"), primary_key=True
     )
 
     # Relationships

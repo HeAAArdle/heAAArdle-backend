@@ -28,16 +28,16 @@ class User(Base):
     # Relationships
 
     # User <-> GameSession: One-to-Many
-    game_sessions: Mapped["GameSession"] = relationship(
-        "GameSession", back_populates="user", uselist=False
+    game_sessions: Mapped[list["GameSession"]] = relationship(
+        "GameSession", back_populates="user", cascade="all, delete-orphan", passive_deletes=True
     )
 
     # User <-> Statistics: One-to-Many
     statistics: Mapped["Statistics"] = relationship(
-        "Statistics", back_populates="user"
+        "Statistics", back_populates="user", cascade="all, delete-orphan", passive_deletes=True
     )
 
     # User <-> Leaderboard: Many-to-Many
     user_leaderboards: Mapped[list["UserLeaderboard"]] = relationship(
-        back_populates="user"
+        back_populates="user", cascade="all, delete-orphan", passive_deletes=True
     )

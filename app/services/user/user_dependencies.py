@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.models.user import User
-from app.services.authentication.jwt import verify_access_token
+from app.services.user.jwt import verify_access_token
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/user/signin")
 

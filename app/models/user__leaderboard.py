@@ -20,7 +20,7 @@ class UserLeaderboard(Base):
     __tablename__ = "user_leaderboard"
 
     userID: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.userID"), primary_key=True
+        UUID(as_uuid=True), ForeignKey("users.userID", ondelete="CASCADE"), primary_key=True
     )
     mode:   Mapped[str] = mapped_column(modes, primary_key=True)
     period: Mapped[str] = mapped_column(period, primary_key=True)
