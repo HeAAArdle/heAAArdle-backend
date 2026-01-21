@@ -1,14 +1,27 @@
+# FastAPI
 from fastapi import APIRouter, Depends
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordBearer
+
+# SQLAlchemy
 from sqlalchemy.orm import Session
 
+# app core / db
 from app.db.session import get_db
-from app.models.user import User
-from app.schemas.account import (SignUpRequest, SignUpResponse, SignInResponse)
-from app.services.user.authentication import sign_up, sign_in, sign_out
-from app.services.user.user_dependencies import get_current_user
-from app.services.user.delete import delete_user
 
+# models
+from app.models.user import User
+
+# schemas
+from app.schemas.account import (
+    SignInResponse,
+    SignUpRequest,
+    SignUpResponse,
+)
+
+# services
+from app.services.user.authentication import sign_in, sign_out, sign_up
+from app.services.user.delete import delete_user
+from app.services.user.user_dependencies import get_current_user
 
 router = APIRouter()
 
@@ -23,15 +36,15 @@ def signup(req: SignUpRequest, db: Session = Depends(get_db)):
 @router.post("/signin/", response_model=SignInResponse)
 def signin(req: SignUpRequest, db: Session = Depends(get_db)):
     """
-    Signs in a user.
+    Signs a user in.
     """
-    user, token = sign_in(db, req.username, req.password)
+    _, token = sign_in(db, req.username, req.password)
     return SignInResponse(access_token=token, token_type="bearer")
 
 @router.post("/signout/")    
 def signout(token: str = Depends(OAuth2PasswordBearer(tokenUrl="/api/v1/user/signin"))):
     """
-    Signs out a user.
+    Signs a user out.
     """
     return sign_out(token)
 

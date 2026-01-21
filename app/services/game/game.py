@@ -23,6 +23,7 @@ from app.schemas.game import StartGameRequest, SubmitGameRequest, SubmitGameResp
 from app.schemas.enums import GameMode as GameModeEnum, SubmittableGameMode as SubmittableGameModeEnum
 
 # websocket
+
 from app.ws.session import sessions
 
 # services
@@ -44,9 +45,9 @@ from app.services.game.game_validator import (
 
 from app.services.song import get_random_song, get_song_metadata_by_songID
 
-from app.services.statistics import update_statistics
+from app.services.statistics.statistics_update import update_statistics_after_game
 
-from app.services.leaderboard import update_leaderboard
+from app.services.leaderboards.leaderboards_update import update_leaderboards_after_game
 
 # exceptions
 from app.services.exceptions import ArchiveDateNotProvided, SessionNotFound
@@ -457,9 +458,9 @@ def submit_game_service(
             # Side Effects
 
             # Update user statistics and leaderboard standings
-            update_statistics(payload, db, user_id)
+            update_statistics_after_game(db, user_id, mode, won, attempts)
 
-            update_leaderboard(payload, db, user_id)
+            update_leaderboards_after_game(db, user_id, mode)
 
             # Commit all database changes
             db.commit()

@@ -1,13 +1,24 @@
-from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, status
-from app.models.user import User
+# FastAPI
+from fastapi import APIRouter, Depends, HTTPException
+
+# SQLAlchemy
 from sqlalchemy.orm import Session
 
-from app.schemas.account import GetUserStatisticsResponse
-from app.services.statistics.statistics_get import get_db_statistics
-from app.services.statistics.statistics_map import stat_mapper
-from app.services.user.user_dependencies import get_current_user
+# app core
 from app.db.session import get_db
+
+# models
+from app.models.user import User
+
+# schemas
+from app.schemas.account import GetUserStatisticsResponse
+
+# services
+from app.services.statistics.statistics_get import get_db_statistics
+
+from app.services.statistics.statistics_map import stat_mapper
+
+from app.services.user.user_dependencies import get_current_user
 
 router = APIRouter()
 

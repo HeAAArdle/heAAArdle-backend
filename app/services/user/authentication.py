@@ -1,4 +1,3 @@
-from django import db
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 
