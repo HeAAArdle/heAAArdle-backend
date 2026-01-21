@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.models.statistics import Statistics
 
+
 def get_db_statistics(db: Session, user_id: UUID) -> dict[str, Statistics]:
     """
     Retrieves statistics, separated by mode, for a given user from the database.

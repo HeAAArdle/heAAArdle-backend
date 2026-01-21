@@ -3,12 +3,20 @@ from sqlalchemy.orm import Session
 
 from app.models.statistics import Statistics
 
-def update_statistics_after_game(db: Session, user_id: uuid.UUID, mode: str, did_win: bool, guesses: int) -> None:
+
+def update_statistics_after_game(
+    db: Session, user_id: uuid.UUID, mode: str, did_win: bool, guesses: int
+) -> None:
     """
     Updates the statistics for a user after a game has been submitted.
     """
     try:
-        stats = db.query(Statistics).filter(Statistics.userID == user_id, Statistics.mode == mode).with_for_update().one()
+        stats = (
+            db.query(Statistics)
+            .filter(Statistics.userID == user_id, Statistics.mode == mode)
+            .with_for_update()
+            .one()
+        )
 
         _increment_games_played(stats)
         _update_win_and_streaks(stats, did_win)
@@ -19,11 +27,13 @@ def update_statistics_after_game(db: Session, user_id: uuid.UUID, mode: str, did
         db.rollback()
         raise
 
+
 def _increment_games_played(stats: Statistics) -> None:
     """
     Increments the total number of games played.
     """
     stats.gamesPlayed += 1
+
 
 def _update_win_and_streaks(stats: Statistics, did_win: bool) -> None:
     """
@@ -37,6 +47,7 @@ def _update_win_and_streaks(stats: Statistics, did_win: bool) -> None:
             stats.maximumStreak = stats.currentStreak
     else:
         stats.currentStreak = 0
+
 
 def _update_guess_distribution(stats: Statistics, guesses: int) -> None:
     """

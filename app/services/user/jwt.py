@@ -7,13 +7,19 @@ SECRET_KEY = settings.supabase_key
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 1 day
 
-def create_access_token(data: dict[str, str], expires_delta: timedelta | None = None) -> str:
+
+def create_access_token(
+    data: dict[str, str], expires_delta: timedelta | None = None
+) -> str:
     assert SECRET_KEY is not None
 
     to_encode = data.copy()
-    expire = datetime.now() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    expire = datetime.now() + (
+        expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
 
 def verify_access_token(token: str) -> dict[str, str] | None:
     assert SECRET_KEY is not None

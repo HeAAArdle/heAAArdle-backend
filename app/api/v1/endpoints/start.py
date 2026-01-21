@@ -42,7 +42,6 @@ from app.services.exceptions import (
     UserAlreadyPlayedTheDailyGame,
 )
 
-
 router = APIRouter()
 
 
@@ -109,7 +108,9 @@ def start_game(
 
     scheme = "wss" if settings.env == "production" else "ws"
 
-    ws_url = AnyWebsocketUrl(f"{scheme}://{settings.host}/{settings.websocket_endpoint_prefix}/{ws_game_session_id}")
+    ws_url = AnyWebsocketUrl(
+        f"{scheme}://{settings.host}/{settings.websocket_endpoint_prefix}/{ws_game_session_id}"
+    )
 
     expires_in_minutes = result.expires_in_minutes
 

@@ -18,7 +18,6 @@ from app.services.exceptions import InvalidYearOrMonth
 
 from app.services.archive.archive import get_archived_daily_game_results_service
 
-
 router = APIRouter()
 
 

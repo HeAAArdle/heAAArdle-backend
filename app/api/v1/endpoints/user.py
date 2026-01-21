@@ -25,40 +25,55 @@ from app.services.user.user_dependencies import get_current_user
 
 router = APIRouter()
 
+
 @router.post("/signup/", response_model=SignUpResponse, status_code=201)
 def signup(req: SignUpRequest, db: Session = Depends(get_db)):
     """
     Registers a new user and returns their username and token.
     """
+
     user, token = sign_up(db, req.username, req.password)
     return SignUpResponse(username=user.username, token=token)
+
 
 @router.post("/signin/", response_model=SignInResponse)
 def signin(req: SignUpRequest, db: Session = Depends(get_db)):
     """
     Signs a user in.
     """
+
     _, token = sign_in(db, req.username, req.password)
     return SignInResponse(access_token=token, token_type="bearer")
 
-@router.post("/signout/")    
+
+@router.post("/signout/")
 def signout(token: str = Depends(OAuth2PasswordBearer(tokenUrl="/api/v1/user/signin"))):
     """
     Signs a user out.
     """
+
     return sign_out(token)
 
+
 @router.delete("/delete")
-def delete_account(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def delete_account(
+    current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
+):
     """
     Permanently deletes the authenticated user's account and all related data.
     """
+
     delete_user(db, current_user.userID)
 
+
 @router.post("/user")
-def get_user(token: str = Depends(OAuth2PasswordBearer(tokenUrl="/api/v1/user/signin")), db: Session = Depends(get_db)):
+def get_user(
+    token: str = Depends(OAuth2PasswordBearer(tokenUrl="/api/v1/user/signin")),
+    db: Session = Depends(get_db),
+):
     """
     Retrieves the user information of the authenticated user.
     """
+
     user = get_current_user(token, db)
     return user

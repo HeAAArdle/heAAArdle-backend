@@ -8,6 +8,7 @@ from app.models.user__leaderboard import UserLeaderboard
 from app.services.user.password import hash_password, verify_password
 from app.services.user.jwt import create_access_token
 
+
 def sign_up(db: Session, username: str, password: str):
     """
     Registers a new user and returns the user object along with an authentication token.
@@ -15,7 +16,9 @@ def sign_up(db: Session, username: str, password: str):
     # Check if username already exists
     existing = db.query(User).filter(User.username == username).first()
     if existing:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Username already exists")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="Username already exists"
+        )
 
     # Create new user with hashed password
     user = User(username=username, password=hash_password(password))
@@ -23,18 +26,24 @@ def sign_up(db: Session, username: str, password: str):
     db.flush()
 
     # Initialize statistics for the new user in all modes
-    db.add_all([
-        Statistics(userID=user.userID, mode="original"),
-        Statistics(userID=user.userID, mode="daily"),
-    ])
+    db.add_all(
+        [
+            Statistics(userID=user.userID, mode="original"),
+            Statistics(userID=user.userID, mode="daily"),
+        ]
+    )
 
     # Initialize leaderboard entries for the new user in all leaderboard types
     leaderboards = db.query(Leaderboard).all()
-    db.add_all([
-        UserLeaderboard(userID=user.userID, mode=lb.mode, period=lb.period, numberOfWins=0) 
-        for lb in leaderboards
-    ])
-    
+    db.add_all(
+        [
+            UserLeaderboard(
+                userID=user.userID, mode=lb.mode, period=lb.period, numberOfWins=0
+            )
+            for lb in leaderboards
+        ]
+    )
+
     # Generate authentication token
     token = create_access_token({"user_id": str(user.userID)})
     db.commit()
@@ -47,10 +56,12 @@ def sign_in(db: Session, username: str, password: str):
     """
     # Look up user by username
     user = db.query(User).filter(User.username == username).first()
-    
+
     # Verify if user exists and valid password
     if not user or not verify_password(password, user.password):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
+        )
 
     # Generate new authentication token
     token = create_access_token({"user_id": str(user.userID)})

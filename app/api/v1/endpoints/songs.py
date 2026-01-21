@@ -13,7 +13,6 @@ from app.schemas.song import GetAllSongResponse
 # utils
 from app.services.song import get_all_song_titles
 
-
 router = APIRouter()
 
 

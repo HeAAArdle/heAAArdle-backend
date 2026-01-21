@@ -20,7 +20,10 @@ from app.models import *
 # schemas
 from app.schemas.game import StartGameRequest, SubmitGameRequest, SubmitGameResponse
 
-from app.schemas.enums import GameMode as GameModeEnum, SubmittableGameMode as SubmittableGameModeEnum
+from app.schemas.enums import (
+    GameMode as GameModeEnum,
+    SubmittableGameMode as SubmittableGameModeEnum,
+)
 
 # websocket
 
@@ -187,7 +190,9 @@ class LyricsGameMode(GameMode):
         lyrics_answer, answer_positions = self._get_lyrics_answer(displayed_lines)
 
         # Mask the lyrics
-        lyrics_given = self._get_lyrics_given(displayed_lines, lyrics_answer, answer_positions)
+        lyrics_given = self._get_lyrics_given(
+            displayed_lines, lyrics_answer, answer_positions
+        )
 
         # Resolve lyrics-mode gameplay constraints
         maximum_attempts = get_maximum_attempts_by_game_mode(GameModeEnum.LYRICS)
@@ -261,11 +266,18 @@ class LyricsGameMode(GameMode):
         answer_text = " ".join(word for _, _, word in selected)
 
         # Also return their corresponding positions
-        answer_positions = [(line_index, word_index) for line_index, word_index, _ in selected]
+        answer_positions = [
+            (line_index, word_index) for line_index, word_index, _ in selected
+        ]
 
         return answer_text, answer_positions
 
-    def _get_lyrics_given(self, lines: list[str], lyrics_answer: str, answer_positions: list[tuple[int, int]]) -> str:
+    def _get_lyrics_given(
+        self,
+        lines: list[str],
+        lyrics_answer: str,
+        answer_positions: list[tuple[int, int]],
+    ) -> str:
         """
         Mask the answer words in the displayed lines.
 
@@ -302,7 +314,9 @@ class LyricsGameMode(GameMode):
             ]
 
             # Mask words starting from the end of the line to prevent shifting indices
-            for word_index, answer_index in sorted(positions, key=lambda x: x[0], reverse=True):
+            for word_index, answer_index in sorted(
+                positions, key=lambda x: x[0], reverse=True
+            ):
                 if word_index >= len(word_spans):
                     raise IndexError("Word index out of bounds.")
 
@@ -468,7 +482,7 @@ def submit_game_service(
         except:
             # Roll back all changes if any persistence step fails
             db.rollback()
-    
+
     # Fetch song metadata
     song_metadata = get_song_metadata_by_songID(db, songID)
 
@@ -481,5 +495,5 @@ def submit_game_service(
         releaseYear=song_metadata.releaseYear,
         album=song_metadata.album,
         shareLink=song_metadata.shareLink,
-        artists=song_metadata.artists
+        artists=song_metadata.artists,
     )

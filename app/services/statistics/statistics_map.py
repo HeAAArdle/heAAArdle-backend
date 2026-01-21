@@ -1,6 +1,7 @@
 from app.models.statistics import Statistics as StatisticsModel
 from app.schemas.account import Statistics as StatisticsSchema
 
+
 def stat_mapper(stats: StatisticsModel) -> StatisticsSchema:
     """
     Maps a Statistics database model instance to a Statistics schema instance.
@@ -23,5 +24,5 @@ def stat_mapper(stats: StatisticsModel) -> StatisticsSchema:
         winPercentage=win_percentage,
         currentStreak=stats.currentStreak,
         maximumStreak=stats.maximumStreak,
-        guessDistribution=guess_distribution
+        guessDistribution=guess_distribution,
     )

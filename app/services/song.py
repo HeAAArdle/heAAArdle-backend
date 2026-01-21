@@ -87,7 +87,7 @@ def get_song_metadata_by_songID(db: Session, song_id: uuid.UUID) -> SongMetadata
     Raises:
         SongNotFound: If the given song is not in the database.
     """
-    
+
     query1 = select(Song).where(Song.songID == song_id)
 
     song = db.scalars(query1).first()
@@ -120,7 +120,7 @@ def get_song_metadata_by_songID(db: Session, song_id: uuid.UUID) -> SongMetadata
         shareLink=shareLink,
         artists=[name for name in artists],
     )
-    
+
 
 def get_signed_audio_link(mode: GameMode, audio_link: str) -> str:
     """

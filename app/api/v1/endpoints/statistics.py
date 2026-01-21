@@ -22,8 +22,11 @@ from app.services.user.user_dependencies import get_current_user
 
 router = APIRouter()
 
+
 @router.post("/", response_model=GetUserStatisticsResponse)
-def get_user_statistics(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def get_user_statistics(
+    user: User = Depends(get_current_user), db: Session = Depends(get_db)
+):
     """
     Verifies the user and retrieves their statistics.
     """
@@ -35,4 +38,6 @@ def get_user_statistics(user: User = Depends(get_current_user), db: Session = De
     if not original or not daily:
         raise HTTPException(status_code=500, detail="Statistics missing")
 
-    return GetUserStatisticsResponse(original=stat_mapper(original), daily=stat_mapper(daily))
+    return GetUserStatisticsResponse(
+        original=stat_mapper(original), daily=stat_mapper(daily)
+    )

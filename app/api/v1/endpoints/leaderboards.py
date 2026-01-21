@@ -12,6 +12,7 @@ from app.services.leaderboards.leaderboards_get import get_db_leaderboard
 
 router = APIRouter()
 
+
 @router.get("/", response_model=GetLeaderboardDataResponse)
 def get_leaderboard(db: Session = Depends(get_db)):
     """
@@ -23,29 +24,15 @@ def get_leaderboard(db: Session = Depends(get_db)):
         return [UserWins(**row) for row in data]
 
     # Original Mode in all periods
-    original_daily = map_users(
-        get_db_leaderboard(db, "original", "daily")
-    )
-    original_weekly = map_users(
-        get_db_leaderboard(db, "original", "weekly")
-    )
-    original_monthly = map_users(
-        get_db_leaderboard(db, "original", "monthly")
-    )
-    original_all_time = map_users(
-        get_db_leaderboard(db, "original", "all_time")
-    )
+    original_daily = map_users(get_db_leaderboard(db, "original", "daily"))
+    original_weekly = map_users(get_db_leaderboard(db, "original", "weekly"))
+    original_monthly = map_users(get_db_leaderboard(db, "original", "monthly"))
+    original_all_time = map_users(get_db_leaderboard(db, "original", "all_time"))
 
     # Daily Mode in all periods
-    daily_weekly = map_users(
-        get_db_leaderboard(db, "daily", "weekly")
-    )
-    daily_monthly = map_users(
-        get_db_leaderboard(db, "daily", "monthly")
-    )
-    daily_all_time = map_users(
-        get_db_leaderboard(db, "daily", "all_time")
-    )
+    daily_weekly = map_users(get_db_leaderboard(db, "daily", "weekly"))
+    daily_monthly = map_users(get_db_leaderboard(db, "daily", "monthly"))
+    daily_all_time = map_users(get_db_leaderboard(db, "daily", "all_time"))
 
     return GetLeaderboardDataResponse(
         original=GetLeaderboardDataOriginal(

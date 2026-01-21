@@ -24,7 +24,6 @@ from app.services.exceptions import (
     UserAlreadyPlayedTheDailyGame,
 )
 
-
 router = APIRouter()
 
 
