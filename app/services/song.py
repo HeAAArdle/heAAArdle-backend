@@ -73,7 +73,7 @@ class SongMetadata:
     title: str
     releaseYear: int
     album: str
-    shareLink: HttpUrl
+    shareLink: str
     artists: list[str]
 
 
@@ -102,7 +102,7 @@ def get_song_metadata_by_songID(db: Session, song_id: uuid.UUID) -> SongMetadata
 
     album = song.album if song.album else "Standalone Single"
 
-    shareLink = HttpUrl(song.shareLink)
+    shareLink = song.shareLink
 
     # Get all artists associated with the song
     query2 = (
