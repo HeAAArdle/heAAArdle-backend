@@ -97,7 +97,7 @@ async def game_ws(websocket: WebSocket, game_session_id: str):
                     )
 
                 # Send metadata for the end game pop up
-                await manager.send(game_session_id, song_metadata)
+                await manager.send(game_session_id, song_metadata.model_dump())
 
                 break
 
