@@ -33,10 +33,6 @@ class InvalidNumberOfAttempts(Exception):
     pass
 
 
-class SessionNotFound(Exception):
-    pass
-
-
 class DuplicateSession(Exception):
     pass
 

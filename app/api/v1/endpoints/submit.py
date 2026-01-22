@@ -18,7 +18,6 @@ from app.services.game.game import submit_game_service
 # exceptions
 from app.services.exceptions import (
     InvalidNumberOfAttempts,
-    SessionNotFound,
     DuplicateSession,
     SongNotFound,
     UserAlreadyPlayedTheDailyGame,
@@ -31,11 +30,11 @@ router = APIRouter()
 def submit_game(
     payload: SubmitGameRequest,
     db: Session = Depends(get_db),
-    # current_user: User = Depends(get_optional_user),  # Uncomment once auth is available
+    # current_user: User = Depends(get_current_user),  # Uncomment once auth is available
 ):
     # Placeholder user ID until auth is available: current_user
     user_id = uuid.UUID("00000000-0000-0000-0000-000000000001")
-    # user_id = current_user.userID if current_user else None
+    # user_id = current_user.userID
 
     try:
         # Process the submitted game and persist results
@@ -43,9 +42,6 @@ def submit_game(
 
     except InvalidNumberOfAttempts:
         raise HTTPException(400, "Invalid number of attempts for the game mode.")
-
-    except SessionNotFound:
-        raise HTTPException(404, "Game session not found.")
 
     except DuplicateSession:
         raise HTTPException(409, "Result already submitted for this session.")

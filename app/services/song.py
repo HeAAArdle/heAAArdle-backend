@@ -1,8 +1,6 @@
 # standard library
 import uuid
 
-from dataclasses import dataclass
-
 # SQLAlchemy
 from sqlalchemy.orm import Session
 
@@ -17,7 +15,7 @@ from app.models import *
 # schemas
 from app.schemas.enums import GameMode
 
-from pydantic import HttpUrl
+from app.schemas.game import SongMetadata
 
 # services
 from app.services.game.game_domain import get_expires_in_minutes_by_game_mode
@@ -68,15 +66,6 @@ def get_random_song(db: Session) -> Song:
     return song
 
 
-@dataclass
-class SongMetadata:
-    title: str
-    releaseYear: int
-    album: str
-    shareLink: str
-    artists: list[str]
-
-
 def get_song_metadata_by_songID(db: Session, song_id: uuid.UUID) -> SongMetadata:
     """
     Retrieve the title, release year, album, and share link of a song linked to a given ID.
@@ -119,6 +108,7 @@ def get_song_metadata_by_songID(db: Session, song_id: uuid.UUID) -> SongMetadata
         album=album,
         shareLink=shareLink,
         artists=[name for name in artists],
+        songID=song_id
     )
 
 

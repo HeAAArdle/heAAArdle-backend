@@ -7,6 +7,7 @@ import uuid
 
 # schemas
 from app.schemas.enums import GameMode
+from app.schemas.game import ServerCheck
 
 # websocket
 from app.ws.session import sessions, GameSession
@@ -61,7 +62,7 @@ def create_ws_game_session(
     return game_session_id
 
 
-def check_guess(game_session_id: str, guess: str) -> dict[str, str | bool | int]:
+def check_guess(game_session_id: str, guess: str) -> ServerCheck:
     """
     Validate a user's guess against the active WebSocket game session.
 
@@ -75,8 +76,14 @@ def check_guess(game_session_id: str, guess: str) -> dict[str, str | bool | int]
 
     # Immediately return if the session has already ended
     if session.done == True:
-        return {"type": "result", "is_correct": False, "done": True, "guess": guess, "attempts": session.attempts}
-
+        return ServerCheck(
+            type="result",
+            guess=guess,
+            is_correct=False,
+            attempts=session.attempts,
+            done=True
+        )
+    
     # Increment the number of attempts for this session
     session.attempts += 1
 
@@ -94,4 +101,10 @@ def check_guess(game_session_id: str, guess: str) -> dict[str, str | bool | int]
         done = False
 
     # Return the result of the guess
-    return {"type": "result", "is_correct": is_correct, "done": done, "guess": guess, "attempts": session.attempts}
+    return ServerCheck(
+        type="result",
+        guess=guess,
+        is_correct=is_correct,
+        attempts=session.attempts,
+        done=done
+    )

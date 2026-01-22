@@ -1,5 +1,7 @@
 from fastapi import WebSocket
 
+from app.schemas.game import ServerCheck, SongMetadata
+
 
 class ConnectionManager:
     def __init__(self):
@@ -18,7 +20,7 @@ class ConnectionManager:
 
         self.connections.pop(game_session_id, None)
 
-    async def send(self, game_session_id: str, message: dict[str, str | bool | int]):
+    async def send(self, game_session_id: str, message: ServerCheck | SongMetadata | dict[str, str]):
         ws = self.connections.get(game_session_id)
 
         if ws:

@@ -18,16 +18,9 @@ from sqlalchemy.orm import Session
 from app.models import *
 
 # schemas
-from app.schemas.game import StartGameRequest, SubmitGameRequest, SubmitGameResponse
+from app.schemas.game import StartGameRequest, SubmitGameRequest
 
-from app.schemas.enums import (
-    GameMode as GameModeEnum,
-    SubmittableGameMode as SubmittableGameModeEnum,
-)
-
-# websocket
-
-from app.ws.session import sessions
+from app.schemas.enums import GameMode as GameModeEnum
 
 # services
 from app.services.game.game_domain import (
@@ -46,14 +39,14 @@ from app.services.game.game_validator import (
     assert_user_has_not_played_the_daily_game,
 )
 
-from app.services.song import get_random_song, get_song_metadata_by_songID
+from app.services.song import get_random_song
 
 from app.services.statistics.statistics_update import update_statistics_after_game
 
 from app.services.leaderboards.leaderboards_update import update_leaderboards_after_game
 
 # exceptions
-from app.services.exceptions import ArchiveDateNotProvided, SessionNotFound
+from app.services.exceptions import ArchiveDateNotProvided
 
 # utils
 from app.api.v1.endpoints.enums import Result
@@ -398,8 +391,8 @@ def start_game_service(
 
 
 def submit_game_service(
-    payload: SubmitGameRequest, db: Session, user_id: Optional[uuid.UUID]
-) -> SubmitGameResponse:
+    payload: SubmitGameRequest, db: Session, user_id: uuid.UUID
+):
     """
     Validate a completed game session and return the result.
     Persist the session and update user-related data only if the user is authenticated.
@@ -407,6 +400,8 @@ def submit_game_service(
 
     # Decompose payload
     ws_game_session_id = payload.wsGameSessionID
+
+    songID = payload.songID
 
     mode = GameModeEnum(payload.mode)
 
@@ -421,20 +416,12 @@ def submit_game_service(
     # Validate attempt count
     assert_number_of_attempts_do_not_exceed_the_mode_maximum(mode, attempts)
 
-    # Get the WebSocket session from in-memory storage
-    ws_game_session = sessions.get(ws_game_session_id)
+    # Prevent duplicate submissions
+    assert_game_session_is_unique(db, ws_game_session_id)
 
-    # Confirm that a WebSocket game session exists
-    if not ws_game_session:
-        raise SessionNotFound()
-
-    if user_id:
-        # Prevent duplicate submissions
-        assert_game_session_is_unique(db, ws_game_session_id)
-
-        # Enforce one daily play per user for daily mode
-        if mode == GameModeEnum.DAILY:
-            assert_user_has_not_played_the_daily_game(db, user_id)
+    # Enforce one daily play per user for daily mode
+    if mode == GameModeEnum.DAILY:
+        assert_user_has_not_played_the_daily_game(db, user_id)
 
     ##
 
@@ -443,57 +430,40 @@ def submit_game_service(
     # Determine the game outcome
     result = Result.win if won else Result.lose
 
-    # Assign date only for daily games
+    # Assign date for daily games
     date = DateType.today() if mode == GameModeEnum.DAILY else None
-
-    # Resolve the answer song from the WebSocket session
-    songID = ws_game_session.answer_song_id
 
     ##
 
-    # Persistence (authenticated users only)
+    # Persistence
 
-    if user_id:
-        try:
-            # Persist the completed game session
-            db_game_session = GameSession(
-                wsGameSessionID=ws_game_session_id,
-                userID=user_id,
-                mode=mode,
-                result=result,
-                songID=songID,
-                date=date,
-            )
+    try:
+        # Persist the completed game session
+        db_game_session = GameSession(
+            wsGameSessionID=ws_game_session_id,
+            userID=user_id,
+            mode=mode,
+            result=result,
+            songID=songID,
+            date=date,
+        )
 
-            db.add(db_game_session)
+        db.add(db_game_session)
 
-            ##
+        ##
 
-            # Side Effects
+        # Side Effects
 
-            # Update user statistics and leaderboard standings
-            update_statistics_after_game(db, user_id, mode, won, attempts)
+        # Update user statistics and leaderboard standings
+        update_statistics_after_game(db, user_id, mode, won, attempts)
 
-            update_leaderboards_after_game(db, user_id, mode)
+        update_leaderboards_after_game(db, user_id, mode)
 
-            # Commit all database changes
-            db.commit()
+        # Commit all database changes
+        db.commit()
 
-        except:
-            # Roll back all changes if any persistence step fails
-            db.rollback()
+    except:
+        # Roll back all changes if any persistence step fails
+        db.rollback()
 
-    # Fetch song metadata
-    song_metadata = get_song_metadata_by_songID(db, songID)
-
-    # Return the game result and song details
-    return SubmitGameResponse(
-        mode=SubmittableGameModeEnum(mode),
-        won=won,
-        attempts=attempts,
-        title=song_metadata.title,
-        releaseYear=song_metadata.releaseYear,
-        album=song_metadata.album,
-        shareLink=song_metadata.shareLink,
-        artists=song_metadata.artists,
-    )
+    return None

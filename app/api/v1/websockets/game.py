@@ -4,6 +4,17 @@ from datetime import datetime, timezone
 # FastAPI
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
+# app core
+from app.db.get_db import db_session
+
+# schemas
+from pydantic import ValidationError
+
+from app.schemas.game import ClientGuess
+
+# services
+from app.services.song import get_song_metadata_by_songID
+
 # websocket
 from app.ws.connection_manager import manager
 
@@ -53,17 +64,12 @@ async def game_ws(websocket: WebSocket, game_session_id: str):
             # }
             data = await websocket.receive_json()
 
-            # Extract the type of message
-            type = data.get("type")
-
-            # Extract the guess
-            guess = data.get("guess")
-
             # Validate message format
-            if not isinstance(data, dict) or type != "guess":
-                await manager.send(
-                    game_session_id, {"error": "Invalid client message format."}
-                )
+            try:
+                message = ClientGuess.model_validate(data)
+
+            except ValidationError:
+                await manager.send(game_session_id, {"error": "Invalid client message format."})
 
                 continue
 
@@ -76,13 +82,23 @@ async def game_ws(websocket: WebSocket, game_session_id: str):
             #   "guess":      str,
             #   "attempts":   int,
             # }
-            response = check_guess(game_session_id, guess)
+            response = check_guess(game_session_id, message.guess)
 
             # Send back the response
             await manager.send(game_session_id, response)
 
             # Break the game loop if the game is finished
-            if response.get("done") == True:
+            if response.done == True:
+                # Fetch song metadata
+                with db_session() as db:
+                    song_metadata = get_song_metadata_by_songID(
+                        db,
+                        session.answer_song_id
+                    )
+
+                # Send metadata for the end game pop up
+                await manager.send(game_session_id, song_metadata)
+
                 break
 
     except WebSocketDisconnect:

@@ -1,10 +1,20 @@
-from pydantic import BaseModel, ConfigDict, HttpUrl, AnyWebsocketUrl, Field
-
-from app.schemas.enums import GameMode, SubmittableGameMode
+# standard library
+import uuid
 
 from datetime import date as DateType
 
-from typing import List, Literal, Optional, Annotated, Union
+from typing import Annotated, List, Literal, Optional, Union
+
+# schemas
+from app.schemas.enums import GameMode, SubmittableGameMode
+
+from pydantic import (
+    AnyWebsocketUrl,
+    BaseModel,
+    ConfigDict,
+    Field,
+    HttpUrl,
+)
 
 
 class StartGameRequest(BaseModel):
@@ -40,8 +50,33 @@ StartGameResponse = Annotated[
 ]
 
 
+class ClientGuess(BaseModel):
+    type: Literal["guess"]
+    guess: str
+
+
+class ServerCheck(BaseModel):
+    type: Literal["result"]
+    guess: str
+    is_correct: bool
+    attempts: int
+    done: bool
+
+
+class SongMetadata(BaseModel):
+    title: str
+    releaseYear: Annotated[int, Field(ge=1)]
+    album: str
+    shareLink: Annotated[str, Field(min_length=1)]
+    artists: List[str]
+    songID: uuid.UUID
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class SubmitGameRequest(BaseModel):
     wsGameSessionID: str
+    songID: uuid.UUID
     mode: SubmittableGameMode
     won: bool
     attempts: Annotated[int, Field(ge=1, le=6)]
