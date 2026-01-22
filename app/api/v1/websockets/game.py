@@ -85,7 +85,7 @@ async def game_ws(websocket: WebSocket, game_session_id: str):
             response = check_guess(game_session_id, message.guess)
 
             # Send back the response
-            await manager.send(game_session_id, response)
+            await manager.send(game_session_id, response.model_dump())
 
             # Break the game loop if the game is finished
             if response.done == True:

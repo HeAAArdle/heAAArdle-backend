@@ -81,9 +81,9 @@ def check_guess(game_session_id: str, guess: str) -> ServerCheck:
             guess=guess,
             is_correct=False,
             attempts=session.attempts,
-            done=True
+            done=True,
         )
-    
+
     # Increment the number of attempts for this session
     session.attempts += 1
 
@@ -106,5 +106,5 @@ def check_guess(game_session_id: str, guess: str) -> ServerCheck:
         guess=guess,
         is_correct=is_correct,
         attempts=session.attempts,
-        done=done
+        done=done,
     )
