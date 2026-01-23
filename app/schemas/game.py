@@ -63,17 +63,6 @@ class ServerCheck(BaseModel):
     done: bool
 
 
-class SongMetadata(BaseModel):
-    title: str
-    releaseYear: Annotated[int, Field(ge=1)]
-    album: str
-    shareLink: Annotated[str, Field(min_length=1)]
-    artists: List[str]
-    songID: uuid.UUID
-
-    model_config = ConfigDict(from_attributes=True)
-
-
 class SubmitGameRequest(BaseModel):
     wsGameSessionID: str
     songID: uuid.UUID

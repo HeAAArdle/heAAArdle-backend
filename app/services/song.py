@@ -15,7 +15,7 @@ from app.models import *
 # schemas
 from app.schemas.enums import GameMode
 
-from app.schemas.game import SongMetadata
+from app.schemas.song import SongMetadata
 
 # services
 from app.services.game.game_domain import get_expires_in_minutes_by_game_mode
@@ -103,6 +103,7 @@ def get_song_metadata_by_songID(db: Session, song_id: uuid.UUID) -> SongMetadata
     artists = db.scalars(query2).all()
 
     return SongMetadata(
+        type="song metadata",
         title=title,
         releaseYear=releaseYear,
         album=album,

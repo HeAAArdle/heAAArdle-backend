@@ -1,6 +1,8 @@
 from fastapi import WebSocket
 
-from app.schemas.game import ServerCheck, SongMetadata
+from app.schemas.game import ServerCheck
+
+from app.schemas.song import SongMetadata
 
 
 class ConnectionManager:
