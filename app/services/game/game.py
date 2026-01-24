@@ -41,6 +41,7 @@ from app.services.game.game_validator import (
     assert_game_session_is_unique,
     assert_date_is_valid_for_non_archive_mode,
     assert_number_of_attempts_do_not_exceed_the_mode_maximum,
+    assert_song_exists,
     assert_user_has_not_played_the_daily_game,
 )
 
@@ -418,6 +419,9 @@ def submit_game_service(payload: SubmitGameRequest, db: Session, user_id: uuid.U
 
     # Validate attempt count
     assert_number_of_attempts_do_not_exceed_the_mode_maximum(mode, attempts)
+
+    # Validate that the referenced song exists in the database
+    assert_song_exists(db, songID)
 
     # Prevent duplicate submissions
     assert_game_session_is_unique(db, ws_game_session_id)

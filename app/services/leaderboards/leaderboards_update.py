@@ -1,26 +1,35 @@
+# standard library
 import uuid
+
+# SQLAlchemy
 from sqlalchemy.orm import Session
 
+# models
 from app.models.user__leaderboard import UserLeaderboard
 
+# schemas
+from app.schemas.enums import GameMode, Period
 
-def update_leaderboards_after_game(db: Session, user_id: uuid.UUID, mode: str):
+
+def update_leaderboards_after_game(db: Session, user_id: uuid.UUID, mode: GameMode):
     """
-    Updates the leaderboards for a user after a game has been won.
+    Update the leaderboards for a user after a game has been won.
     """
-    if mode == "original":
-        periods = ["daily", "weekly", "monthly", "allTime"]
+
+    if mode == GameMode.ORIGINAL:
+        periods = [Period.DAILY, Period.WEEKLY, Period.MONTHLY, Period.ALL_TIME]
     else:
-        periods = ["weekly", "monthly", "allTime"]
+        periods = [Period.WEEKLY, Period.MONTHLY, Period.ALL_TIME]
 
     for period in periods:
         increment_leaderboard(db, user_id, mode, period)
 
 
-def increment_leaderboard(db: Session, user_id: uuid.UUID, mode: str, period: str):
+def increment_leaderboard(db: Session, user_id: uuid.UUID, mode: GameMode, period: str):
     """
-    Increments the number of wins for a user in the leaderboard of a specific mode.
+    Increment the number of wins for a user in the leaderboard of a specific mode.
     """
+
     row = (
         db.query(UserLeaderboard)
         .filter(
@@ -33,6 +42,8 @@ def increment_leaderboard(db: Session, user_id: uuid.UUID, mode: str, period: st
 
     if not row:
         row = UserLeaderboard(userID=user_id, mode=mode, period=period, numberOfWins=1)
+
         db.add(row)
+
     else:
         row.numberOfWins += 1

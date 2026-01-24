@@ -42,3 +42,13 @@ class DuplicateSession(Exception):
 
 class InvalidYearOrMonth(Exception):
     pass
+
+
+# Leaderboards
+
+class LimitIsBelow1(Exception):
+    pass
+
+
+class UserNotOnLeaderboard(Exception):
+    pass

@@ -12,3 +12,10 @@ class GameMode(str, Enum):
 class SubmittableGameMode(str, Enum):
     ORIGINAL = "original"
     DAILY = "daily"
+
+
+class Period(str, Enum):
+    DAILY = "daily"
+    WEEKLY = "weekly"
+    MONTHLY = "monthly"
+    ALL_TIME = "all_time"

@@ -26,6 +26,8 @@ from app.services.exceptions import (
 # services
 from app.services.game.game_domain import get_maximum_attempts_by_game_mode
 
+from app.services.song import get_song_by_songID
+
 
 def assert_date_is_not_today_or_in_the_future(date: DateType):
     """
@@ -93,6 +95,17 @@ def assert_number_of_attempts_do_not_exceed_the_mode_maximum(
 
     if attempts > maximum_attempts:
         raise InvalidNumberOfAttempts()
+
+
+def assert_song_exists(db: Session, song_id: uuid.UUID):
+    """
+    Ensure the song the frontend passes exists in the database.
+
+    Raises:
+        SongNotFound: If the given song is not in the database.
+    """
+
+    get_song_by_songID(db, song_id)
 
 
 def assert_game_session_is_unique(db: Session, ws_game_session_id: str):

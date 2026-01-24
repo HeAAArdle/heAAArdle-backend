@@ -66,6 +66,24 @@ def get_random_song(db: Session) -> Song:
     return song
 
 
+def get_song_by_songID(db: Session, song_id: uuid.UUID) -> Song:
+    """
+    Retrieve a song by ID or raise if it does not exist.
+
+    Raises:
+        SongNotFound: If the given song is not in the database.
+    """
+
+    query = select(Song).where(Song.songID == song_id)
+
+    song = db.scalars(query).first()
+
+    if not song:
+        raise SongNotFound()
+
+    return song
+
+
 def get_song_metadata_by_songID(db: Session, song_id: uuid.UUID) -> SongMetadata:
     """
     Retrieve the title, release year, album, and share link of a song linked to a given ID.
@@ -77,12 +95,7 @@ def get_song_metadata_by_songID(db: Session, song_id: uuid.UUID) -> SongMetadata
         SongNotFound: If the given song is not in the database.
     """
 
-    query1 = select(Song).where(Song.songID == song_id)
-
-    song = db.scalars(query1).first()
-
-    if not song:
-        raise SongNotFound()
+    song = get_song_by_songID(db, song_id)
 
     # Resolve song metadata
     title = song.title
@@ -94,13 +107,13 @@ def get_song_metadata_by_songID(db: Session, song_id: uuid.UUID) -> SongMetadata
     shareLink = song.shareLink
 
     # Get all artists associated with the song
-    query2 = (
+    query = (
         select(Artist.name)
         .join(SongArtist, Artist.artistID == SongArtist.artistID)
         .where(SongArtist.songID == song_id)
     )
 
-    artists = db.scalars(query2).all()
+    artists = db.scalars(query).all()
 
     return SongMetadata(
         type="song metadata",

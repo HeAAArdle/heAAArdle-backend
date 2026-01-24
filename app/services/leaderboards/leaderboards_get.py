@@ -1,35 +1,70 @@
-from sqlalchemy.orm import Session
-from sqlalchemy import func, select
+# standard library
 from uuid import UUID
+from typing import Optional
 
-from app.models.user__leaderboard import UserLeaderboard
+# SQLAlchemy
+from sqlalchemy import func, select
+
+from sqlalchemy.orm import Session
+
+# models
 from app.models.user import User
 
+from app.models.user__leaderboard import UserLeaderboard
 
-def get_db_leaderboard(db: Session, mode: str, period: str, limit: int = 5):
+# schemas
+from app.schemas.game import UserWins
+
+from app.schemas.enums import GameMode, Period
+
+# exceptions
+from app.services.exceptions import LimitIsBelow1, UserNotOnLeaderboard
+
+
+def get_db_leaderboard(
+    db: Session, mode: GameMode, period: Period, limit: int = 5
+) -> list[UserWins]:
     """
-    Returns top N (5) users for a given mode and period leaderboard.
+    Retrieve the top users for a specific game mode and period.
+
+    Returns:
+        A list of UserWins objects containing usernames and win counts.
     """
-    # Query the leaderboard entries
-    result = (
-        db.query(User.username, UserLeaderboard.numberOfWins)
+
+    # Validate that the row limit is at least 1
+    if limit <= 0:
+        raise LimitIsBelow1()
+
+    # Query the leaderboard, joining with the User table to get usernames
+
+    # Filter by the requested mode and period
+
+    # Order by number of wins descending and limit the results by the input
+    query = (
+        select(User.username, UserLeaderboard.numberOfWins)
         .join(User, User.userID == UserLeaderboard.userID)
-        .filter(UserLeaderboard.mode == mode, UserLeaderboard.period == period)
+        .where(UserLeaderboard.mode == mode, UserLeaderboard.period == period)
         .order_by(UserLeaderboard.numberOfWins.desc())
         .limit(limit)
-        .all()
     )
 
-    return [{"username": row.username, "wins": row.numberOfWins} for row in result]
+    rows = db.scalars(query).all()
+
+    # Convert query results into a list of UserWins
+    return [UserWins(username=row.username, wins=row.numberOfWins) for row in rows]
 
 
 def get_db_user_leaderboard_ranking(
-    db: Session, user_id: UUID, mode: str, period: str
-) -> int | None:
+    db: Session, user_id: UUID, mode: GameMode, period: Period
+) -> Optional[int]:
     """
-    Returns the rank of a user in the specific leaderboard.
+    Retrieve the rank of a specific user within a leaderboard for a mode and period.
+
+    Returns:
+        The user's rank as an integer, or None if the user is not on the leaderboard.
     """
-    # Sorts the users by number of wins and assigns ranks
+
+    # Generate a subquery that ranks all users by number of wins in descending order
     ranked_subquery = (
         select(
             UserLeaderboard.userID,
@@ -42,11 +77,15 @@ def get_db_user_leaderboard_ranking(
         .subquery()
     )
 
-    # Query the rank of the specific user
+    # Query the rank of the specified user from the ranked subquery
     result = (
         db.query(ranked_subquery.c.rank)
         .filter(ranked_subquery.c.userID == user_id)
         .first()
     )
 
-    return result.rank if result else None
+    # Validate that the user has a corresponding leaderboard entry
+    if result is None:
+        raise UserNotOnLeaderboard()
+
+    return result.rank

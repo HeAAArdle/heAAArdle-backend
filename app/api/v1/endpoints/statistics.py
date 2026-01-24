@@ -36,7 +36,7 @@ def get_user_statistics(
     daily = stats.get("daily")
 
     if not original or not daily:
-        raise HTTPException(status_code=500, detail="Statistics missing")
+        raise HTTPException(status_code=500, detail="Statistics missing.")
 
     return GetUserStatisticsResponse(
         original=stat_mapper(original), daily=stat_mapper(daily)

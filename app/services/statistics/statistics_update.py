@@ -2,14 +2,16 @@ import uuid
 from sqlalchemy.orm import Session
 
 from app.models.statistics import Statistics
+from app.schemas.enums import GameMode
 
 
 def update_statistics_after_game(
-    db: Session, user_id: uuid.UUID, mode: str, did_win: bool, guesses: int
+    db: Session, user_id: uuid.UUID, mode: GameMode, did_win: bool, guesses: int
 ) -> None:
     """
     Updates the statistics for a user after a game has been submitted.
     """
+
     try:
         stats = (
             db.query(Statistics)
@@ -32,6 +34,7 @@ def _increment_games_played(stats: Statistics) -> None:
     """
     Increments the total number of games played.
     """
+
     stats.gamesPlayed += 1
 
 
@@ -39,6 +42,7 @@ def _update_win_and_streaks(stats: Statistics, did_win: bool) -> None:
     """
     Updates win count and streaks based on whether the user won the game.
     """
+
     if did_win:
         stats.winCount += 1
         stats.currentStreak += 1
@@ -51,10 +55,11 @@ def _update_win_and_streaks(stats: Statistics, did_win: bool) -> None:
 
 def _update_guess_distribution(stats: Statistics, guesses: int) -> None:
     """
-    Updates the guess distribution based on the number of guesses taken to win.
+    Update the guess distribution based on the number of guesses taken to win.
     """
+
     if guesses < 1 or guesses > 6:
-        raise ValueError("Guesses must be between 1 and 6")
+        raise ValueError("Guesses must be between 1 and 6.")
 
     if guesses == 1:
         stats.guesses1 += 1

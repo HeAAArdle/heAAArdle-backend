@@ -30,20 +30,27 @@ router = APIRouter()
 @router.post("/signup/", response_model=SignUpResponse, status_code=201)
 def signup(req: SignUpRequest, db: Session = Depends(get_db)):
     """
-    Registers a new user and returns their username and token.
+    Register a new user account.
+
+    Returns:
+        The created user's username and an authentication token.
     """
 
+    # Create a new user and issue an authentication token
     user, token = sign_up(db, req.username, req.password)
+
     return SignUpResponse(username=user.username, token=token)
 
 
 @router.post("/signin/", response_model=SignInResponse)
 def signin(req: SignUpRequest, db: Session = Depends(get_db)):
     """
-    Signs a user in.
+    Authenticate an existing user and issue an access token.
     """
 
+    # Validate credentials and generate a new access token
     _, token = sign_in(db, req.username, req.password)
+
     return SignInResponse(access_token=token, token_type="bearer")
 
 
@@ -58,24 +65,29 @@ def signout(token: str = Depends(oauth2_scheme)):
 
 @router.delete("/delete")
 def delete_account(
-    current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     """
-    Permanently deletes the authenticated user's account and all related data.
+    Permanently delete the authenticated user's account.
+
+    This operation removes the user and all associated data.
     """
 
+    # Delete the user and all related records from the database
     delete_user(db, current_user.userID)
 
 
-@router.post("/user")
+@router.post("/get_user")
 def get_user(
     token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db),
 ):
     """
-    Retrieves the user information of the authenticated user.
+    Retrieve the currently authenticated user's information.
     """
 
+    # Resolve and return the authenticated user from the token
     user = get_current_user(token, db)
 
     return user

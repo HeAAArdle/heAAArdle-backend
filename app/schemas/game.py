@@ -111,7 +111,7 @@ class GetArchivedDailyGameResultsResponse(BaseModel):
 class UserWins(BaseModel):
     username: str
     wins: int
-
+    userRank: Optional[int] = None
 
 class GetLeaderboardDataOriginal(BaseModel):
     daily: List[UserWins]
