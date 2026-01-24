@@ -1,4 +1,5 @@
 # FastAPI
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 
 # SQLAlchemy
@@ -50,7 +51,7 @@ router = APIRouter()
 @router.post("/start", response_model=StartGameResponse)
 def start_game(
     payload: StartGameRequest,
-    user: User | None = Depends(get_optional_user),
+    user: Optional[User] = Depends(get_optional_user),
     db: Session = Depends(get_db),
 ):
     user_id = user.userID if user else None
