@@ -50,10 +50,10 @@ router = APIRouter()
 @router.post("/start", response_model=StartGameResponse)
 def start_game(
     payload: StartGameRequest,
-    user: User = Depends(get_optional_user),
+    user: User | None = Depends(get_optional_user),
     db: Session = Depends(get_db),
 ):
-    user_id = user.userID
+    user_id = user.userID if user else None
 
     try:
         # Resolve game request
