@@ -1,6 +1,3 @@
-# standard library
-import uuid
-
 # FastAPI
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -9,11 +6,16 @@ from sqlalchemy.orm import Session
 # app core
 from app.db.get_db import get_db
 
+# models
+from app.models.user import User
+
 # schemas
 from app.schemas.game import SubmitGameRequest, SubmitGameResponse
 
 # services
 from app.services.game.game import submit_game_service
+
+from app.services.user.user_dependencies import get_current_user
 
 # exceptions
 from app.services.exceptions import (
@@ -29,12 +31,10 @@ router = APIRouter()
 @router.post("/submit", response_model=SubmitGameResponse)
 def submit_game(
     payload: SubmitGameRequest,
+    user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
-    # current_user: User = Depends(get_current_user),  # Uncomment once auth is available
 ):
-    # Placeholder user ID until auth is available: current_user
-    user_id = uuid.UUID("00000000-0000-0000-0000-000000000001")
-    # user_id = current_user.userID
+    user_id = user.userID
 
     try:
         # Process the submitted game and persist results
