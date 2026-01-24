@@ -38,7 +38,7 @@ def submit_game(
 
     try:
         # Process the submitted game and persist results
-        result = submit_game_service(payload, db, user_id)
+        submit_game_service(payload, db, user_id)
 
     except InvalidNumberOfAttempts:
         raise HTTPException(400, "Invalid number of attempts for the game mode.")
@@ -52,5 +52,4 @@ def submit_game(
     except SongNotFound:
         raise HTTPException(404, "Song not found in the database.")
 
-    # Return game result and song metadata
-    return result
+    return None

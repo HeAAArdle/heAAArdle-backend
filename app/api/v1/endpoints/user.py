@@ -1,11 +1,10 @@
 # FastAPI
 from fastapi import APIRouter, Depends
-from fastapi.security import OAuth2PasswordBearer
 
 # SQLAlchemy
 from sqlalchemy.orm import Session
 
-# app core / db
+# app core
 from app.db.session import get_db
 
 # models
@@ -23,7 +22,7 @@ from app.services.user.authentication import sign_in, sign_out, sign_up
 
 from app.services.user.delete import delete_user
 
-from app.services.user.user_dependencies import get_current_user
+from app.services.user.user_dependencies import get_current_user, oauth2_scheme
 
 router = APIRouter()
 
@@ -49,7 +48,7 @@ def signin(req: SignUpRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/signout/")
-def signout(token: str = Depends(OAuth2PasswordBearer(tokenUrl="/api/v1/user/signin"))):
+def signout(token: str = Depends(oauth2_scheme)):
     """
     Signs a user out.
     """
@@ -70,7 +69,7 @@ def delete_account(
 
 @router.post("/user")
 def get_user(
-    token: str = Depends(OAuth2PasswordBearer(tokenUrl="/api/v1/user/signin")),
+    token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db),
 ):
     """

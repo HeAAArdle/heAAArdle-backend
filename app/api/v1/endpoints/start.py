@@ -1,5 +1,7 @@
-# FastAPI
+# standard library
 from typing import Optional
+
+# FastAPI
 from fastapi import APIRouter, Depends, HTTPException
 
 # SQLAlchemy
@@ -92,7 +94,8 @@ def start_game(
         result.lyrics_answer if payload.mode == GameMode.LYRICS else result.song.title
     )
 
-    assert answer is not None
+    if answer is None:
+        raise HTTPException(500, "Game answer could not be resolved.")
 
     # Create a new WebSocket game session and return its ID
     ws_game_session_id = create_ws_game_session(

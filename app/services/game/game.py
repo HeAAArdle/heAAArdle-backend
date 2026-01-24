@@ -11,6 +11,9 @@ from dataclasses import dataclass
 
 from typing import Optional
 
+# FastAPI
+from fastapi import HTTPException
+
 # SQLAlchemy
 from sqlalchemy.orm import Session
 
@@ -465,5 +468,7 @@ def submit_game_service(payload: SubmitGameRequest, db: Session, user_id: uuid.U
     except SQLAlchemyError:
         # Roll back all changes if any persistence step fails
         db.rollback()
+
+        raise HTTPException(500, "ENKKKKKKK DI NAGPEPERSIST")
 
     return None

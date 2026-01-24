@@ -8,7 +8,7 @@ from fastapi.security import OAuth2PasswordBearer
 # SQLAlchemy
 from sqlalchemy.orm import Session
 
-# app core / db
+# app core
 from app.db.session import get_db
 
 # models
