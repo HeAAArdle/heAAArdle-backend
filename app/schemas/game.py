@@ -103,6 +103,7 @@ Day = Annotated[
 
 class GetArchivedDailyGameResultsResponse(BaseModel):
     numberOfDays: Annotated[int, Field(ge=1, le=31)]
+    numberOfDaysOfPreviousMonth: Annotated[int, Field(ge=1, le=31)]
     startingDay: Annotated[int, Field(ge=0, le=6)]
     days: List[Day]
 

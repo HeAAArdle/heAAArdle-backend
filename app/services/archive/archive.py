@@ -28,8 +28,21 @@ def get_archived_daily_game_results_service(
     Gets the archived daily game results for a user for a given month.
     """
 
-    # Validate year and month
+    # Validate year and month and get the starting weekday and number of days
     starting_day, number_of_days = validate_year_and_month(year, month)
+
+    # Get previous year and month
+    if month == 1:
+        # Input month is January
+        previous_month = 12
+        previous_year = year - 1
+
+    else:
+        previous_month = month - 1
+        previous_year = year
+
+    # Validate previous year and month and get the number of days
+    _, number_of_days_of_previous_month = validate_year_and_month(previous_year, previous_month)
 
     # Retrieve all dates in the month where a daily game was available
     daily_game_dates = get_archived_daily_game_dates_by_month(db, year, month)
@@ -46,6 +59,7 @@ def get_archived_daily_game_results_service(
 
     return GetArchivedDailyGameResultsResponse(
         numberOfDays=number_of_days,
+        numberOfDaysOfPreviousMonth=number_of_days_of_previous_month,
         startingDay=starting_day,
         days=days,
     )
