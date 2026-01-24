@@ -42,7 +42,9 @@ def get_archived_daily_game_results_service(
         previous_year = year
 
     # Validate previous year and month and get the number of days
-    _, number_of_days_of_previous_month = validate_year_and_month(previous_year, previous_month)
+    _, number_of_days_of_previous_month = validate_year_and_month(
+        previous_year, previous_month
+    )
 
     # Retrieve all dates in the month where a daily game was available
     daily_game_dates = get_archived_daily_game_dates_by_month(db, year, month)

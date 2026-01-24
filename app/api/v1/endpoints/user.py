@@ -20,7 +20,9 @@ from app.schemas.account import (
 
 # services
 from app.services.user.authentication import sign_in, sign_out, sign_up
+
 from app.services.user.delete import delete_user
+
 from app.services.user.user_dependencies import get_current_user
 
 router = APIRouter()
@@ -76,4 +78,5 @@ def get_user(
     """
 
     user = get_current_user(token, db)
+
     return user

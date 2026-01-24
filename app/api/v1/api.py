@@ -1,6 +1,15 @@
 from fastapi import APIRouter
 from app.api.v1.websockets import game
-from app.api.v1.endpoints import health, statistics, user, leaderboards, songs, start, submit, archive
+from app.api.v1.endpoints import (
+    health,
+    statistics,
+    user,
+    leaderboards,
+    songs,
+    start,
+    submit,
+    archive,
+)
 
 api_router = APIRouter()
 

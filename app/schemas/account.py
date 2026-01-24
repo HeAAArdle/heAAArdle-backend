@@ -1,8 +1,10 @@
 from pydantic import BaseModel, Field
 from typing import Annotated, Tuple
 
+
 class GetUserStatisticsRequest(BaseModel):
     token: str
+
 
 class Statistics(BaseModel):
     gamesPlayed: int
@@ -18,7 +20,6 @@ class GetUserStatisticsResponse(BaseModel):
     daily: Statistics
 
 
-
 class GetUserResponse(BaseModel):
     username: str
     token: str
@@ -32,7 +33,6 @@ class SignInRequest(BaseModel):
 class SignInResponse(BaseModel):
     access_token: str
     token_type: str
-
 
 
 class SignUpRequest(BaseModel):

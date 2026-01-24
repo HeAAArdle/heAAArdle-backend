@@ -109,7 +109,7 @@ def get_song_metadata_by_songID(db: Session, song_id: uuid.UUID) -> SongMetadata
         album=album,
         shareLink=shareLink,
         artists=[name for name in artists],
-        songID=song_id
+        songID=song_id,
     )
 
 

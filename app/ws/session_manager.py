@@ -75,7 +75,7 @@ def check_guess(game_session_id: str, guess: str) -> ServerCheck:
     session = sessions[game_session_id]
 
     # Immediately return if the session has already ended
-    if session.done == True:
+    if session.done is True:
         return ServerCheck(
             type="result",
             guess=guess,

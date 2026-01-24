@@ -2,6 +2,7 @@ from contextlib import contextmanager
 
 from app.db.session import SessionLocal
 
+
 @contextmanager
 def db_session():
     db = SessionLocal()

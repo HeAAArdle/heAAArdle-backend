@@ -22,7 +22,6 @@ from app.ws.session import sessions
 
 from app.ws.session_manager import check_guess
 
-
 router = APIRouter()
 
 
@@ -57,11 +56,6 @@ async def game_ws(websocket: WebSocket, game_session_id: str):
                 break
 
             # Wait for a guess
-
-            # {
-            #   "type":  "guess",
-            #   "guess": string,
-            # }
             data = await websocket.receive_json()
 
             # Validate message format
@@ -69,35 +63,30 @@ async def game_ws(websocket: WebSocket, game_session_id: str):
                 message = ClientGuess.model_validate(data)
 
             except ValidationError:
-                await manager.send(game_session_id, {"error": "Invalid client message format."})
+                await manager.send(
+                    game_session_id, {"error": "Invalid client message format."}
+                )
 
                 continue
 
             # Process the guess
-
-            # {
-            #   "type":       "result",
-            #   "is_correct": bool,
-            #   "done":       bool,
-            #   "guess":      str,
-            #   "attempts":   int,
-            # }
             response = check_guess(game_session_id, message.guess)
 
             # Send back the response
             await manager.send(game_session_id, response.model_dump())
 
             # Break the game loop if the game is finished
-            if response.done == True:
+            if response.done is True:
                 # Fetch song metadata
                 with db_session() as db:
                     song_metadata = get_song_metadata_by_songID(
-                        db,
-                        session.answer_song_id
+                        db, session.answer_song_id
                     )
 
                 # Send metadata for the end game pop up
-                await manager.send(game_session_id, song_metadata.model_dump(mode="json"))
+                await manager.send(
+                    game_session_id, song_metadata.model_dump(mode="json")
+                )
 
                 break
 

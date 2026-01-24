@@ -14,6 +14,8 @@ from typing import Optional
 # SQLAlchemy
 from sqlalchemy.orm import Session
 
+from sqlalchemy.exc import SQLAlchemyError
+
 # models
 from app.models import *
 
@@ -390,9 +392,7 @@ def start_game_service(
     return handler.resolve(payload, db, user_id)
 
 
-def submit_game_service(
-    payload: SubmitGameRequest, db: Session, user_id: uuid.UUID
-):
+def submit_game_service(payload: SubmitGameRequest, db: Session, user_id: uuid.UUID):
     """
     Validate a completed game session and return the result.
     Persist the session and update user-related data only if the user is authenticated.
@@ -462,7 +462,7 @@ def submit_game_service(
         # Commit all database changes
         db.commit()
 
-    except:
+    except SQLAlchemyError:
         # Roll back all changes if any persistence step fails
         db.rollback()
 

@@ -96,9 +96,7 @@ class AvailableDay(BaseModel):
     result: Optional[bool]
 
 
-Day = Annotated[
-    Union[AvailableDay, UnavailableDay], Field(discriminator="available")
-]
+Day = Annotated[Union[AvailableDay, UnavailableDay], Field(discriminator="available")]
 
 
 class GetArchivedDailyGameResultsResponse(BaseModel):
