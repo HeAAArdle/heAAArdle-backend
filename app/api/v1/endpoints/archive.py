@@ -11,7 +11,7 @@ from app.db.get_db import get_db
 from app.models.user import User
 
 # schemas
-from app.schemas.game import GetArchivedDailyGameResultsResponse
+from app.schemas.archive import GetArchivedDailyGameResultsResponse
 
 # services
 from app.services.archive.archive import get_archived_daily_game_results_service

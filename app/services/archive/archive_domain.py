@@ -7,7 +7,7 @@ from typing import List
 from app.models import *
 
 # schemas
-from app.schemas.game import (
+from app.schemas.archive import (
     AvailableDay,
     Day,
     UnavailableDay,

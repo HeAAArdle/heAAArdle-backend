@@ -39,9 +39,11 @@ from app.services.user.user_dependencies import get_optional_user
 
 # exceptions
 from app.services.exceptions import (
+    AnswerPositionsLengthMismatch,
     ArchiveDateNotProvided,
     DateIsTodayOrInTheFuture,
     DateProvided,
+    EmptyLyricsWords,
     NoSongAvailable,
     DailyGameNotFound,
     UserAlreadyPlayedTheDailyGame,
@@ -75,11 +77,11 @@ def start_game(
     except UserAlreadyPlayedTheDailyGame:
         raise HTTPException(403, "User has already played today's Heardle.")
 
-    except ValueError as error:
-        raise HTTPException(status_code=400, detail=str(error))
+    except EmptyLyricsWords:
+        raise HTTPException(400, "No words available in lyrics.")
 
-    except IndexError as error:
-        raise HTTPException(status_code=400, detail=str(error))
+    except AnswerPositionsLengthMismatch:
+        raise HTTPException(400, "Answer positions length does not match answer length.")
 
     except ArchiveDateNotProvided:
         raise HTTPException(400, "Archive mode requires a date.")

@@ -5,7 +5,7 @@ import uuid
 from sqlalchemy.orm import Session
 
 # schemas
-from app.schemas.game import GetArchivedDailyGameResultsResponse
+from app.schemas.archive import GetArchivedDailyGameResultsResponse
 
 # services
 from app.services.archive.archive_domain import create_days_list

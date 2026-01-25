@@ -13,7 +13,7 @@ from app.models.user import User
 from app.models.user__leaderboard import UserLeaderboard
 
 # schemas
-from app.schemas.game import UserWins
+from app.schemas.leaderboards import LeaderboardRow
 
 from app.schemas.enums import GameMode, Period
 
@@ -23,12 +23,12 @@ from app.services.exceptions import LimitIsBelow1, UserNotOnLeaderboard
 
 def get_db_leaderboard(
     db: Session, mode: GameMode, period: Period, limit: int = 5
-) -> list[UserWins]:
+) -> list[LeaderboardRow]:
     """
     Retrieve the top users for a specific game mode and period.
 
     Returns:
-        A list of UserWins objects containing usernames and win counts.
+        A list of LeaderboardRow objects containing usernames and win counts.
     """
 
     # Validate that the row limit is at least 1
@@ -48,20 +48,26 @@ def get_db_leaderboard(
         .limit(limit)
     )
 
-    rows = db.scalars(query).all()
+    rows = db.execute(query).all()
 
-    # Convert query results into a list of UserWins
-    return [UserWins(username=row.username, wins=row.numberOfWins) for row in rows]
+    # Convert query results into a list of LeaderboardRow
+    return [
+        LeaderboardRow(username=row.username, numberOfWins=row.numberOfWins)
+        for row in rows
+    ]
 
 
 def get_db_user_leaderboard_ranking(
     db: Session, user_id: UUID, mode: GameMode, period: Period
-) -> Optional[int]:
+) -> tuple[int, int]:
     """
-    Retrieve the rank of a specific user within a leaderboard for a mode and period.
+    Retrieve the rank and win count of a specific user within a leaderboard for a mode and period.
 
     Returns:
-        The user's rank as an integer, or None if the user is not on the leaderboard.
+        A tuple of (rank, numberOfWins).
+
+    Raises:
+        UserNotOnLeaderboard: If the user has no leaderboard entry.
     """
 
     # Generate a subquery that ranks all users by number of wins in descending order
@@ -77,9 +83,12 @@ def get_db_user_leaderboard_ranking(
         .subquery()
     )
 
-    # Query the rank of the specified user from the ranked subquery
+    # Query the rank and number of wins of the specified user from the subquery
     result = (
-        db.query(ranked_subquery.c.rank)
+        db.query(
+            ranked_subquery.c.rank,
+            ranked_subquery.c.numberOfWins,
+        )
         .filter(ranked_subquery.c.userID == user_id)
         .first()
     )
@@ -88,4 +97,58 @@ def get_db_user_leaderboard_ranking(
     if result is None:
         raise UserNotOnLeaderboard()
 
-    return result.rank
+    return result.rank, result.numberOfWins
+
+
+def build_leaderboard(
+    db: Session,
+    mode: GameMode,
+    period: Period,
+    user: Optional[User],
+    limit: int = 5,
+) -> list[LeaderboardRow]:
+    """
+    Build a leaderboard for a provided game mode and period.
+
+    Includes the top users and, if applicable, the current user's ranking.
+    """
+    # Retrieve the top users for the given mode and period
+    top_users = get_db_leaderboard(db, mode, period, limit)
+
+    leaderboard: list[LeaderboardRow] = []
+
+    # Track whether the current user appears in the top results
+    user_in_top = False
+
+    # Populate leaderboard rows from the top users
+    for row in top_users:
+        # Determine whether this row corresponds to the authenticated user
+        is_current_user = user is not None and row.username == user.username
+
+        if is_current_user:
+            user_in_top = True
+
+        leaderboard.append(
+            LeaderboardRow(
+                username=row.username,
+                isUser=is_current_user,
+                numberOfWins=row.numberOfWins,
+            )
+        )
+
+    # If the user is authenticated but not in the top list, append their individual ranking at the end
+    if user and not user_in_top:
+        rank, numberOfWins = get_db_user_leaderboard_ranking(
+            db, user.userID, mode, period
+        )
+
+        leaderboard.append(
+            LeaderboardRow(
+                username=user.username,
+                isUser=True,
+                numberOfWins=numberOfWins,
+                rank=rank,
+            )
+        )
+
+    return leaderboard

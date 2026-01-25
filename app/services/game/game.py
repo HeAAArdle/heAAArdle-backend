@@ -52,7 +52,11 @@ from app.services.statistics.statistics_update import update_statistics_after_ga
 from app.services.leaderboards.leaderboards_update import update_leaderboards_after_game
 
 # exceptions
-from app.services.exceptions import ArchiveDateNotProvided
+from app.services.exceptions import (
+    AnswerPositionsLengthMismatch,
+    ArchiveDateNotProvided,
+    EmptyLyricsWords,
+)
 
 # utils
 from app.api.v1.endpoints.enums import Result
@@ -244,7 +248,7 @@ class LyricsGameMode(GameMode):
 
         # Guard against empty input
         if not words:
-            raise ValueError("No words available in lyrics.")
+            raise EmptyLyricsWords()
 
         # Randomly choose whether the answer is one or two words long
         answer_length = random.choice([1, 2])
@@ -291,7 +295,7 @@ class LyricsGameMode(GameMode):
 
         # Validate that the provided positions match the number of words in the answer
         if len(answer_positions) != answer_length:
-            raise ValueError("Answer positions length does not match answer length.")
+            raise AnswerPositionsLengthMismatch()
 
         masked_lines = lines.copy()
 

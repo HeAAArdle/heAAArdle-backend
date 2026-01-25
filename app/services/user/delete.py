@@ -9,8 +9,9 @@ def delete_user(db: Session, user_id: UUID):
 
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found."
         )
 
     db.delete(user)
+
     db.commit()

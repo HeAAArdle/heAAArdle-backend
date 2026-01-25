@@ -1,12 +1,22 @@
-from sqlalchemy.orm import Session
+# FastAPI
 from fastapi import HTTPException, status
 
-from app.models.user import User
-from app.models.statistics import Statistics
+# SQLAlchemy
+from sqlalchemy.orm import Session
+
+# models
 from app.models.leaderboard import Leaderboard
+
+from app.models.statistics import Statistics
+
+from app.models.user import User
+
 from app.models.user__leaderboard import UserLeaderboard
-from app.services.user.password import hash_password, verify_password
+
+# services
 from app.services.user.jwt import create_access_token
+
+from app.services.user.password import hash_password, verify_password
 
 
 def sign_up(db: Session, username: str, password: str):

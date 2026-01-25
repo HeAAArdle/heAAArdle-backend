@@ -1,10 +1,13 @@
+# models
 from app.models.statistics import Statistics as StatisticsModel
+
+# schemas
 from app.schemas.account import Statistics as StatisticsSchema
 
 
 def stat_mapper(stats: StatisticsModel) -> StatisticsSchema:
     """
-    Maps a Statistics database model instance to a Statistics schema instance.
+    Map a Statistics database model instance to a Statistics schema instance.
     """
 
     gamesPlayed = stats.gamesPlayed

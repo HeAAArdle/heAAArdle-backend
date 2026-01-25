@@ -13,6 +13,8 @@ from app.models.user import User
 # schemas
 from app.schemas.account import GetUserStatisticsResponse
 
+from app.schemas.enums import GameMode
+
 # services
 from app.services.statistics.statistics_get import get_db_statistics
 
@@ -28,13 +30,19 @@ def get_user_statistics(
     user: User = Depends(get_current_user), db: Session = Depends(get_db)
 ):
     """
-    Verifies the user and retrieves their statistics.
+    Retrieve statistics for the authenticated user.
+
+    Verifies the user and fetches their statistics for each game mode.
     """
+    # Fetch raw statistics from the database for the user
     stats = get_db_statistics(db, user.userID)
 
-    original = stats.get("original")
-    daily = stats.get("daily")
+    # Extract statistics for Original and Daily game modes
+    original = stats.get(GameMode.ORIGINAL)
 
+    daily = stats.get(GameMode.DAILY)
+
+    # Ensure that statistics exist for both modes
     if not original or not daily:
         raise HTTPException(status_code=500, detail="Statistics missing.")
 

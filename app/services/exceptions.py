@@ -29,6 +29,14 @@ class UserAlreadyPlayedTheDailyGame(Exception):
     pass
 
 
+class EmptyLyricsWords(Exception):
+    pass
+
+
+class AnswerPositionsLengthMismatch(Exception):
+    pass
+
+
 class InvalidNumberOfAttempts(Exception):
     pass
 
@@ -45,6 +53,7 @@ class InvalidYearOrMonth(Exception):
 
 
 # Leaderboards
+
 
 class LimitIsBelow1(Exception):
     pass
