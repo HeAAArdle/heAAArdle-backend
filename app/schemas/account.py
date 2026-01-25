@@ -1,23 +1,8 @@
+# standard library
+from typing import Annotated
+
+# schemas
 from pydantic import BaseModel, Field
-from typing import Annotated, Tuple
-
-
-class GetUserStatisticsRequest(BaseModel):
-    token: str
-
-
-class Statistics(BaseModel):
-    gamesPlayed: int
-    winCount: int
-    winPercentage: int
-    currentStreak: int
-    maximumStreak: int
-    guessDistribution: Tuple[int, int, int, int, int, int]
-
-
-class GetUserStatisticsResponse(BaseModel):
-    original: Statistics
-    daily: Statistics
 
 
 class GetUserResponse(BaseModel):

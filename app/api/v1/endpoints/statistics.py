@@ -11,7 +11,7 @@ from app.db.session import get_db
 from app.models.user import User
 
 # schemas
-from app.schemas.account import GetUserStatisticsResponse
+from app.schemas.statistics import GetUserStatisticsResponse
 
 from app.schemas.enums import GameMode
 

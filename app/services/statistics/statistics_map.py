@@ -2,7 +2,7 @@
 from app.models.statistics import Statistics as StatisticsModel
 
 # schemas
-from app.schemas.account import Statistics as StatisticsSchema
+from app.schemas.statistics import Statistics as StatisticsSchema
 
 
 def stat_mapper(stats: StatisticsModel) -> StatisticsSchema:
