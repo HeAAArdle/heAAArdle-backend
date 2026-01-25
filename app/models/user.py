@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from app.models.user__leaderboard import UserLeaderboard
     from app.models.statistics import Statistics
 
+
 class User(Base):
     __tablename__ = "users"
 
@@ -29,12 +30,12 @@ class User(Base):
 
     # User <-> GameSession: One-to-Many
     game_sessions: Mapped[list["GameSession"]] = relationship(
-        "GameSession", back_populates="user", cascade="all, delete-orphan", passive_deletes=True
+        "GameSession", back_populates="user", cascade="all, delete-orphan", passive_deletes=True,
     )
 
     # User <-> Statistics: One-to-Many
     statistics: Mapped["Statistics"] = relationship(
-        "Statistics", back_populates="user", cascade="all, delete-orphan", passive_deletes=True
+        "Statistics", back_populates="user", cascade="all, delete-orphan", passive_deletes=True,
     )
 
     # User <-> Leaderboard: Many-to-Many

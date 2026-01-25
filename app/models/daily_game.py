@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from app.models.song import Song
     from app.models.game_session import GameSession
 
+
 class DailyGame(Base):
     __tablename__ = "daily_games"
 
@@ -40,5 +41,6 @@ class DailyGame(Base):
     game_sessions: Mapped[list["GameSession"]] = relationship(
         "GameSession", back_populates="daily_game"
     )
+
 
 # (songID, date) is the composite primary key

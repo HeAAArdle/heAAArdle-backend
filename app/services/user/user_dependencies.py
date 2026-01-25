@@ -3,6 +3,7 @@ from typing import Optional
 
 # FastAPI
 from fastapi import Depends, HTTPException, status
+
 from fastapi.security import OAuth2PasswordBearer
 
 # SQLAlchemy

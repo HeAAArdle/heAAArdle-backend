@@ -14,10 +14,11 @@ if TYPE_CHECKING:
     from app.models.artist import Artist
     from app.models.song import Song
 
+
 class SongArtist(Base):
     __tablename__ = "song__artist"
 
-    songID:   Mapped[uuid.UUID] = mapped_column(
+    songID: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("songs.songID"), primary_key=True
     )
     artistID: Mapped[uuid.UUID] = mapped_column(

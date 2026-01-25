@@ -1,9 +1,6 @@
 # standard library
 import random
 
-# models
-from app.models import *
-
 # schemas
 from app.schemas.enums import GameMode
 
