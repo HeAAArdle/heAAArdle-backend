@@ -72,7 +72,7 @@ def assert_user_has_not_played_the_daily_game(db: Session, user_id: uuid.UUID):
     # Check if a daily game session exists for this user today
     query = select(GameSession).where(
         GameSession.userID == user_id,
-        GameSession.mode == "daily",
+        GameSession.mode == GameMode.DAILY,
         GameSession.date == today,
     )
 

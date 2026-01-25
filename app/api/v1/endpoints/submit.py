@@ -19,6 +19,7 @@ from app.services.user.user_dependencies import get_current_user
 
 # exceptions
 from app.services.exceptions import (
+    DatabasePersistenceFailed,
     InvalidNumberOfAttempts,
     DuplicateSession,
     SongNotFound,
@@ -51,5 +52,8 @@ def submit_game(
 
     except SongNotFound:
         raise HTTPException(404, "Song not found in the database.")
+
+    except DatabasePersistenceFailed:
+        raise HTTPException(500, "The database failed to persist the data.")
 
     return None

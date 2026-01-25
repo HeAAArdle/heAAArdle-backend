@@ -27,7 +27,7 @@ from app.services.user.user_dependencies import get_current_user, oauth2_scheme
 router = APIRouter()
 
 
-@router.post("/signup/", response_model=SignUpResponse, status_code=201)
+@router.post("/signup", response_model=SignUpResponse, status_code=201)
 def signup(req: SignUpRequest, db: Session = Depends(get_db)):
     """
     Register a new user account.
@@ -42,7 +42,7 @@ def signup(req: SignUpRequest, db: Session = Depends(get_db)):
     return SignUpResponse(username=user.username, token=token)
 
 
-@router.post("/signin/", response_model=SignInResponse)
+@router.post("/signin", response_model=SignInResponse)
 def signin(req: SignUpRequest, db: Session = Depends(get_db)):
     """
     Authenticate an existing user and issue an access token.
@@ -54,7 +54,7 @@ def signin(req: SignUpRequest, db: Session = Depends(get_db)):
     return SignInResponse(access_token=token, token_type="bearer")
 
 
-@router.post("/signout/")
+@router.post("/signout")
 def signout(token: str = Depends(oauth2_scheme)):
     """
     Signs a user out.
@@ -78,7 +78,7 @@ def delete_account(
     delete_user(db, current_user.userID)
 
 
-@router.post("/get_user")
+@router.post("/")
 def get_user(
     token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db),

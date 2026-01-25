@@ -45,6 +45,10 @@ class DuplicateSession(Exception):
     pass
 
 
+class DatabasePersistenceFailed(Exception):
+    pass
+
+
 # Archive
 
 

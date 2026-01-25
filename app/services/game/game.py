@@ -11,9 +11,6 @@ from dataclasses import dataclass
 
 from typing import Optional
 
-# FastAPI
-from fastapi import HTTPException
-
 # SQLAlchemy
 from sqlalchemy.orm import Session
 
@@ -55,6 +52,7 @@ from app.services.leaderboards.leaderboards_domain import update_leaderboards_af
 from app.services.exceptions import (
     AnswerPositionsLengthMismatch,
     ArchiveDateNotProvided,
+    DatabasePersistenceFailed,
     EmptyLyricsWords,
 )
 
@@ -147,10 +145,8 @@ class DailyGameMode(GameMode):
         # Get the daily game configuration for today
         daily_game = get_daily_game(db, date)
 
-        # Compute a valid audio clip starting position for the daily mode
-        audio_start_at = get_audio_start_at_by_game_mode(
-            GameModeEnum.DAILY, daily_game.song.duration
-        )
+        # Get the hardcoded audio clip starting position for the daily mode
+        audio_start_at = daily_game.startAt
 
         # Resolve daily-mode gameplay constraints
         maximum_attempts = get_maximum_attempts_by_game_mode(GameModeEnum.DAILY)
@@ -477,6 +473,6 @@ def submit_game_service(payload: SubmitGameRequest, db: Session, user_id: uuid.U
         # Roll back all changes if any persistence step fails
         db.rollback()
 
-        raise HTTPException(500, "ENKKKKKKK DI NAGPEPERSIST")
+        raise DatabasePersistenceFailed()
 
     return None
