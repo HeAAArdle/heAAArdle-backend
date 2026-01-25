@@ -49,7 +49,7 @@ from app.services.song import get_random_song
 
 from app.services.statistics.statistics_update import update_statistics_after_game
 
-from app.services.leaderboards.leaderboards_update import update_leaderboards_after_game
+from app.services.leaderboards.leaderboards_domain import update_leaderboards_after_game
 
 # exceptions
 from app.services.exceptions import (

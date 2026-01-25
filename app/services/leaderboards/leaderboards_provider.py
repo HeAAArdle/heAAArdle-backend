@@ -1,6 +1,5 @@
 # standard library
 from uuid import UUID
-from typing import Optional
 
 # SQLAlchemy
 from sqlalchemy import func, select
@@ -98,57 +97,3 @@ def get_db_user_leaderboard_ranking(
         raise UserNotOnLeaderboard()
 
     return result.rank, result.numberOfWins
-
-
-def build_leaderboard(
-    db: Session,
-    mode: GameMode,
-    period: Period,
-    user: Optional[User],
-    limit: int = 5,
-) -> list[LeaderboardRow]:
-    """
-    Build a leaderboard for a provided game mode and period.
-
-    Includes the top users and, if applicable, the current user's ranking.
-    """
-    # Retrieve the top users for the given mode and period
-    top_users = get_db_leaderboard(db, mode, period, limit)
-
-    leaderboard: list[LeaderboardRow] = []
-
-    # Track whether the current user appears in the top results
-    user_in_top = False
-
-    # Populate leaderboard rows from the top users
-    for row in top_users:
-        # Determine whether this row corresponds to the authenticated user
-        is_current_user = user is not None and row.username == user.username
-
-        if is_current_user:
-            user_in_top = True
-
-        leaderboard.append(
-            LeaderboardRow(
-                username=row.username,
-                isUser=is_current_user,
-                numberOfWins=row.numberOfWins,
-            )
-        )
-
-    # If the user is authenticated but not in the top list, append their individual ranking at the end
-    if user and not user_in_top:
-        rank, numberOfWins = get_db_user_leaderboard_ranking(
-            db, user.userID, mode, period
-        )
-
-        leaderboard.append(
-            LeaderboardRow(
-                username=user.username,
-                isUser=True,
-                numberOfWins=numberOfWins,
-                rank=rank,
-            )
-        )
-
-    return leaderboard

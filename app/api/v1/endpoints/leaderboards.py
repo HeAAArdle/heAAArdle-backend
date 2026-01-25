@@ -22,7 +22,7 @@ from app.schemas.leaderboards import (
 from app.schemas.enums import GameMode, Period
 
 # services
-from app.services.leaderboards.leaderboards_get import build_leaderboard
+from app.services.leaderboards.leaderboards_domain import build_leaderboard
 
 from app.services.user.user_dependencies import get_optional_user
 
