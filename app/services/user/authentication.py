@@ -31,7 +31,8 @@ def sign_up(db: Session, username: str, password: str):
 
     if existing:
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="Another user already has this username."
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Another user already has this username.",
         )
 
     # Create new user with hashed password

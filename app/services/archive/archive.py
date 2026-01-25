@@ -1,6 +1,8 @@
 # standard library
 import uuid
 
+from typing import Optional
+
 # SQLAlchemy
 from sqlalchemy.orm import Session
 
@@ -22,7 +24,7 @@ def get_archived_daily_game_results_service(
     year: int,
     month: int,
     db: Session,
-    user_id: uuid.UUID,
+    user_id: Optional[uuid.UUID],
 ) -> GetArchivedDailyGameResultsResponse:
     """
     Gets the archived daily game results for a user for a given month.
@@ -50,9 +52,15 @@ def get_archived_daily_game_results_service(
     daily_game_dates = get_archived_daily_game_dates_by_month(db, year, month)
 
     # Retrieve daily game sessions played by the user during the month
-    daily_game_sessions = get_archived_daily_game_sessions_by_user_id_and_month(
-        db, user_id, year, month
-    )
+
+    # Only get game sessions if user is signed in
+    if user_id:
+        daily_game_sessions = get_archived_daily_game_sessions_by_user_id_and_month(
+            db, user_id, year, month
+        )
+
+    else:
+        daily_game_sessions = {}
 
     # Construct the per-day availability and result list for the response
     days = create_days_list(

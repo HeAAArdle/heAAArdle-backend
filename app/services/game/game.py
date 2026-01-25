@@ -187,7 +187,7 @@ class LyricsGameMode(GameMode):
         lyrics_start_at = self._get_lyrics_start_at(lines)
 
         # Derive the lines displayed to the user
-        displayed_lines = lines[lyrics_start_at:lyrics_start_at + self.LINES_TO_SHOW]
+        displayed_lines = lines[lyrics_start_at : lyrics_start_at + self.LINES_TO_SHOW]
 
         # Pick the answer
         lyrics_answer, answer_positions = self._get_lyrics_answer(displayed_lines)
@@ -264,7 +264,7 @@ class LyricsGameMode(GameMode):
         start = random.randint(0, maximum_start_index)
 
         # Select the contiguous word slice (may span multiple lines)
-        selected = words[start:start + answer_length]
+        selected = words[start : start + answer_length]
 
         answer_text = " ".join(word for _, _, word in selected)
 

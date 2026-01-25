@@ -17,7 +17,10 @@ from app.schemas.enums import GameMode, Period
 from app.schemas.leaderboards import LeaderboardRow
 
 # services
-from app.services.leaderboards.leaderboards_provider import get_db_leaderboard, get_db_user_leaderboard_ranking
+from app.services.leaderboards.leaderboards_provider import (
+    get_db_leaderboard,
+    get_db_user_leaderboard_ranking,
+)
 
 
 def build_leaderboard(

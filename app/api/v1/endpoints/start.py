@@ -81,7 +81,9 @@ def start_game(
         raise HTTPException(400, "No words available in lyrics.")
 
     except AnswerPositionsLengthMismatch:
-        raise HTTPException(400, "Answer positions length does not match answer length.")
+        raise HTTPException(
+            400, "Answer positions length does not match answer length."
+        )
 
     except ArchiveDateNotProvided:
         raise HTTPException(400, "Archive mode requires a date.")

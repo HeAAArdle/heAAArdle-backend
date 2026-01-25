@@ -47,8 +47,12 @@ def get_leaderboard(
         # Original: fetch top users for daily, weekly, monthly, and all-time periods
         original_daily = build_leaderboard(db, GameMode.ORIGINAL, Period.DAILY, user)
         original_weekly = build_leaderboard(db, GameMode.ORIGINAL, Period.WEEKLY, user)
-        original_monthly = build_leaderboard(db, GameMode.ORIGINAL, Period.MONTHLY, user)
-        original_all_time = build_leaderboard(db, GameMode.ORIGINAL, Period.ALL_TIME, user)
+        original_monthly = build_leaderboard(
+            db, GameMode.ORIGINAL, Period.MONTHLY, user
+        )
+        original_all_time = build_leaderboard(
+            db, GameMode.ORIGINAL, Period.ALL_TIME, user
+        )
 
         # Daily: fetch top users for weekly, monthly, and all-time periods
         daily_weekly = build_leaderboard(db, GameMode.DAILY, Period.WEEKLY, user)

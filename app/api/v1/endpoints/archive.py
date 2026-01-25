@@ -1,3 +1,6 @@
+# standard library
+from typing import Optional
+
 # FastAPI
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -16,7 +19,7 @@ from app.schemas.archive import GetArchivedDailyGameResultsResponse
 # services
 from app.services.archive.archive import get_archived_daily_game_results_service
 
-from app.services.user.user_dependencies import get_current_user
+from app.services.user.user_dependencies import get_optional_user
 
 # exceptions
 from app.services.exceptions import InvalidYearOrMonth
@@ -28,10 +31,10 @@ router = APIRouter()
 def get_archived_daily_game_results(
     year: int,
     month: int,
-    user: User = Depends(get_current_user),
+    user: Optional[User] = Depends(get_optional_user),
     db: Session = Depends(get_db),
 ):
-    user_id = user.userID
+    user_id = user.userID if user else None
 
     try:
         return get_archived_daily_game_results_service(year, month, db, user_id)
