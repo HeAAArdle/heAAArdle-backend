@@ -3,7 +3,7 @@ import uuid
 
 from datetime import date as DateType
 
-from typing import Annotated, List, Literal, Optional, Union
+from typing import Annotated, Literal, Optional, Union
 
 # schemas
 from app.schemas.enums import GameMode, SubmittableGameMode
@@ -11,7 +11,6 @@ from app.schemas.enums import GameMode, SubmittableGameMode
 from pydantic import (
     AnyWebsocketUrl,
     BaseModel,
-    ConfigDict,
     Field,
     HttpUrl,
 )
@@ -69,16 +68,3 @@ class SubmitGameRequest(BaseModel):
     mode: SubmittableGameMode
     won: bool
     attempts: Annotated[int, Field(ge=1, le=6)]
-
-
-class SubmitGameResponse(BaseModel):
-    mode: SubmittableGameMode
-    won: bool
-    attempts: Annotated[int, Field(ge=1, le=6)]
-    title: str
-    releaseYear: Annotated[int, Field(ge=1)]
-    album: str
-    shareLink: Annotated[str, Field(min_length=1)]
-    artists: List[str]
-
-    model_config = ConfigDict(from_attributes=True)

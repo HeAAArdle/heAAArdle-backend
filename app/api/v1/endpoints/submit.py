@@ -10,7 +10,7 @@ from app.db.get_db import get_db
 from app.models.user import User
 
 # schemas
-from app.schemas.game import SubmitGameRequest, SubmitGameResponse
+from app.schemas.game import SubmitGameRequest
 
 # services
 from app.services.game.game import submit_game_service
@@ -28,7 +28,7 @@ from app.services.exceptions import (
 router = APIRouter()
 
 
-@router.post("/submit", response_model=SubmitGameResponse)
+@router.post("/submit")
 def submit_game(
     payload: SubmitGameRequest,
     user: User = Depends(get_current_user),
