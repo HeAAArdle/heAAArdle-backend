@@ -29,7 +29,7 @@ from app.services.exceptions import (
 router = APIRouter()
 
 
-@router.post("/submit")
+@router.post("/submit/")
 def submit_game(
     payload: SubmitGameRequest,
     user: User = Depends(get_current_user),

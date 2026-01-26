@@ -52,7 +52,7 @@ from app.services.exceptions import (
 router = APIRouter()
 
 
-@router.post("/start", response_model=StartGameResponse)
+@router.post("/start/", response_model=StartGameResponse)
 def start_game(
     payload: StartGameRequest,
     user: Optional[User] = Depends(get_optional_user),

@@ -16,7 +16,7 @@ from app.services.song import get_all_song_titles
 router = APIRouter()
 
 
-@router.get("/songs", response_model=list[GetAllSongResponse])
+@router.get("/songs/", response_model=list[GetAllSongResponse])
 def get_all_songs(db: Session = Depends(get_db)):
     # Get an ordered list of titles
     titles = get_all_song_titles(db)
