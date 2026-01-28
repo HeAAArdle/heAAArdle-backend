@@ -13,6 +13,8 @@ from app.models.user import User
 
 from app.models.user__leaderboard import UserLeaderboard
 
+from app.models.token import Token
+
 # services
 from app.schemas.enums import GameMode
 
@@ -94,9 +96,17 @@ def sign_in(db: Session, username: str, password: str):
 
     # Generate new authentication token
     token = create_access_token({"user_id": str(user.userID)})
+    
+    # Store the token in the database
+    db.add(Token(
+        userID=user.userID,
+        token=token,
+        is_active=True,
+    ))
 
+    db.commit()
     return user, token
 
-
+# Currently not in use
 def sign_out(token: str):
     return {"message": "Sign out successful; discard the token on client side."}

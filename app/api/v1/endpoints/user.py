@@ -10,6 +10,8 @@ from app.db.session import get_db
 # models
 from app.models.user import User
 
+from app.models.token import Token
+
 # schemas
 from app.schemas.account import (
     SignInResponse,
@@ -18,7 +20,7 @@ from app.schemas.account import (
 )
 
 # services
-from app.services.user.authentication import sign_in, sign_out, sign_up
+from app.services.user.authentication import sign_in, sign_up
 
 from app.services.user.delete import delete_user
 
@@ -55,12 +57,15 @@ def signin(req: SignUpRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/signout/")
-def signout(token: str = Depends(oauth2_scheme)):
+def sign_out(
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db),
+):
     """
-    Signs a user out.
-    """
+    Invalidate the current user's authentication token."""
+    db.query(Token).filter(Token.token == token).update({"is_active": False})
 
-    return sign_out(token)
+    db.commit()
 
 
 @router.delete("/delete/")
